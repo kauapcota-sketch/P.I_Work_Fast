@@ -21,6 +21,8 @@ class _PerfilPageState extends State<PerfilPage> {
 
   final box = hive.box('perfil');
 
+  static get hive => null;
+
   @override
   void initState() {
     super.initState();
