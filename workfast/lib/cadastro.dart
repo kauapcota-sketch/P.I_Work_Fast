@@ -1,6 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'package:workfast/login.dart';
+import 'user_service.dart';
 
 void main() {
   runApp(const Cadastro());
@@ -18,8 +18,84 @@ class Cadastro extends StatelessWidget {
   }
 }
 
-class TelaCadastro extends StatelessWidget {
+class TelaCadastro extends StatefulWidget {
   const TelaCadastro({super.key});
+
+  @override
+  State<TelaCadastro> createState() => _TelaCadastroState();
+}
+
+class _TelaCadastroState extends State<TelaCadastro> {
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  
+  bool _obscureText = true;
+  String? _errorMessage;
+
+  final UserService _userService = UserService();
+
+  void _handleCadastro() {
+    final username = _usernameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    setState(() {
+      _errorMessage = null;
+    });
+
+    if (username.isEmpty || email.isEmpty || password.isEmpty) {
+      setState(() {
+        _errorMessage = 'Preencha todos os campos';
+      });
+      return;
+    }
+
+    if (username.length < 3) {
+      setState(() {
+        _errorMessage = 'Usuário deve ter pelo menos 3 caracteres';
+      });
+      return;
+    }
+
+    if (!_userService.isValidEmail(email)) {
+      setState(() {
+        _errorMessage = 'Email inválido';
+      });
+      return;
+    }
+
+    if (password.length < 6) {
+      setState(() {
+        _errorMessage = 'Senha deve ter pelo menos 6 caracteres';
+      });
+      return;
+    }
+
+    if (_userService.cadastrarUsuario(username, email, password)) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => login(
+            initialUsername: username,
+            initialPassword: password,
+          ),
+        ),
+      );
+    } else {
+      setState(() {
+        _errorMessage = 'Usuário já existe ou dados inválidos';
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +162,35 @@ class TelaCadastro extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
+                        // Mensagem de erro
+                        if (_errorMessage != null)
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            margin: const EdgeInsets.only(bottom: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.red.shade50,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.red.shade200),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.error_outline, color: Colors.red.shade600, size: 20),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    _errorMessage!,
+                                    style: TextStyle(
+                                      color: Colors.red.shade700,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
                         TextField(
+                          controller: _usernameController,
                           decoration: InputDecoration(
                             labelText: 'Usuário',
                             prefixIcon: const Icon(Icons.person_outline),
@@ -102,6 +206,8 @@ class TelaCadastro extends StatelessWidget {
                         const SizedBox(height: 20),
 
                         TextField(
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
                           decoration: InputDecoration(
                             labelText: 'Gmail',
                             prefixIcon: const Icon(Icons.email_outlined),
@@ -117,11 +223,23 @@ class TelaCadastro extends StatelessWidget {
                         const SizedBox(height: 20),
 
                         TextField(
-                          obscureText: true,
+                          controller: _passwordController,
+                          obscureText: _obscureText,
                           decoration: InputDecoration(
                             labelText: 'Senha',
                             prefixIcon: const Icon(Icons.lock_outline),
-                            suffixIcon: const Icon(Icons.visibility_off_outlined),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscureText 
+                                  ? Icons.visibility_off_outlined 
+                                  : Icons.visibility_outlined
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscureText = !_obscureText;
+                                });
+                              },
+                            ),
                             filled: true,
                             fillColor: const Color(0xFFF1F4F8),
                             border: OutlineInputBorder(
@@ -137,9 +255,7 @@ class TelaCadastro extends StatelessWidget {
                           width: double.infinity,
                           height: 58,
                           child: ElevatedButton(
-                            onPressed: () {
-                              print('Cadastro');
-                            },
+                            onPressed: _handleCadastro,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF27485F),
                               shape: RoundedRectangleBorder(
@@ -172,7 +288,7 @@ class TelaCadastro extends StatelessWidget {
                       ),
                       TextButton(
                         onPressed: () {
-                          Navigator.push(
+                          Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                               builder: (context) => const login(),
@@ -198,4 +314,3 @@ class TelaCadastro extends StatelessWidget {
     );
   }
 }
-
