@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:workfast/buscar_trabalho.dart';
-import 'package:workfast/cadastro.dart';
-import 'user_service.dart'; // ← ADICIONE ESTE IMPORT
+import 'package:seu_app_nome/buscar_trabalho.dart';
+import 'package:seu_app_nome/cadastro.dart';
+import 'user_service.dart'; 
 
 void main() {
   runApp(const login());

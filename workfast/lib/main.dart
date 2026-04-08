@@ -1,10 +1,7 @@
-
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
-import 'pages/registrar_problema_page.dart';
-=======
-import 'package:workfast/login.dart';
->>>>>>> f04512e51ea2765c9eae95e7f33c66570c65271a
+import 'package:seu_app_nome/cadastro.dart';
+import 'package:seu_app_nome/login.dart';
+
 
 void main() => runApp(const MyApp());
 
@@ -13,19 +10,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-<<<<<<< HEAD
-    return MaterialApp(
-      title: 'Workfast',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF3A7BD5)),
-        useMaterial3: true,
-      ),
-      home: const RegistrarProblemaPage(),
-    );
-  }
-}
-=======
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
       home: TelaInicial(),
@@ -73,7 +57,7 @@ class TelaInicial extends StatelessWidget {
                     const Text(
                       'Bem-vindo',
                       style: TextStyle(
-                        color: Color.fromARGB(255, 0, 0, 0),
+                        color: Colors.white, // Corrigido para branco
                         fontSize: 34,
                         fontWeight: FontWeight.bold,
                       ),
@@ -85,8 +69,8 @@ class TelaInicial extends StatelessWidget {
                       'Entre para continuar',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Color.fromARGB(255, 0, 0, 0),
-                        fontSize: 30,
+                        color: Colors.white70, // Corrigido para branco
+                        fontSize: 20, // Ajustado tamanho
                       ),
                     ),
 
@@ -95,10 +79,25 @@ class TelaInicial extends StatelessWidget {
                     BotaoAnimado(
                       texto: 'LOGAR',
                       onTap: () {
-                        Navigator.push(
+                        Navigator.pushReplacement( // ← pushReplacement
                           context,
                           MaterialPageRoute(
                             builder: (context) => const login(),
+                          ),
+                        );
+                      },
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // ← BOTÃO CADASTRO ADICIONAL
+                    BotaoAnimado(
+                      texto: 'CADASTRAR',
+                      onTap: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const Cadastro(),
                           ),
                         );
                       },
@@ -157,6 +156,7 @@ class _BotaoAnimadoState extends State<BotaoAnimado> {
         child: Container(
           width: 250,
           height: 58,
+          margin: const EdgeInsets.only(bottom: 10), // Espaçamento
           decoration: BoxDecoration(
             color: const Color(0xFF27485F),
             borderRadius: BorderRadius.circular(18),
@@ -184,5 +184,3 @@ class _BotaoAnimadoState extends State<BotaoAnimado> {
     );
   }
 }
-
->>>>>>> f04512e51ea2765c9eae95e7f33c66570c65271a
