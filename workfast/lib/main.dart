@@ -83,7 +83,7 @@ class TelaInicial extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const Login1(),
+                            builder: (context) => const login(),
                           ),
                         );
                       },

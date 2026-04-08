@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:workfast/cadastro.dart';
 
 void main() {
-  runApp(const Login1());
+  runApp(const login());
 }
 
-class Login1 extends StatelessWidget {
-  const Login1({super.key});
+class login extends StatelessWidget {
+  const login({super.key});
 
   @override
   Widget build(BuildContext context) {
