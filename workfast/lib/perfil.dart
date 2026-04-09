@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:image_picker/image_picker.dart';
 
 class PerfilPage extends StatefulWidget {
@@ -16,31 +17,37 @@ class _PerfilPageState extends State<PerfilPage> {
   final emailController = TextEditingController();
 
   List<String> experiencias = [];
-
   File? imagem;
 
-  final box = hive.box('perfil');
-
-  static get hive => null;
+  // Mudamos para nullable para evitar erro de inicialização tardia (late initialization error)
+  Box? box;
 
   @override
   void initState() {
     super.initState();
+    _initHive();
+  }
 
-    nomeController.text = box.get('nome', defaultValue: '');
-    descricaoController.text = box.get('descricao', defaultValue: '');
-    telefoneController.text = box.get('telefone', defaultValue: '');
-    emailController.text = box.get('email', defaultValue: '');
+  Future<void> _initHive() async {
+    // Como abrimos no main, aqui ele apenas recupera a instância já aberta
+    box = Hive.box('perfil');
+    
+    // Usamos setState para que a tela mostre os dados assim que carregarem
+    setState(() {
+      nomeController.text = box!.get('nome', defaultValue: '');
+      descricaoController.text = box!.get('descricao', defaultValue: '');
+      telefoneController.text = box!.get('telefone', defaultValue: '');
+      emailController.text = box!.get('email', defaultValue: '');
 
-    experiencias = List<String>.from(
-      box.get('experiencias', defaultValue: []),
-    );
+      experiencias = List<String>.from(
+        box!.get('experiencias', defaultValue: <String>[]),
+      );
 
-    String? caminhoImagem = box.get('imagem');
-
-    if (caminhoImagem != null && File(caminhoImagem).existsSync()) {
-      imagem = File(caminhoImagem);
-    }
+      String? caminhoImagem = box!.get('imagem');
+      if (caminhoImagem != null && File(caminhoImagem).existsSync()) {
+        imagem = File(caminhoImagem);
+      }
+    });
   }
 
   @override
@@ -54,29 +61,33 @@ class _PerfilPageState extends State<PerfilPage> {
 
   Future<void> escolherImagem() async {
     final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.gallery);
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-    if (picked != null) {
+    if (pickedFile != null) {
       setState(() {
-        imagem = File(picked.path);
+        imagem = File(pickedFile.path);
       });
     }
   }
 
   void salvarDados() {
-    box.put('nome', nomeController.text);
-    box.put('descricao', descricaoController.text);
-    box.put('telefone', telefoneController.text);
-    box.put('email', emailController.text);
-    box.put('experiencias', experiencias);
+    if (box == null) return;
+
+    box!.put('nome', nomeController.text.trim());
+    box!.put('descricao', descricaoController.text.trim());
+    box!.put('telefone', telefoneController.text.trim());
+    box!.put('email', emailController.text.trim());
+    box!.put('experiencias', experiencias);
 
     if (imagem != null) {
-      box.put('imagem', imagem!.path);
+      box!.put('imagem', imagem!.path);
     }
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Dados salvos com sucesso!'),
+        content: Text('✅ Dados salvos com sucesso!'),
+        backgroundColor: Colors.green,
+        duration: Duration(seconds: 2),
       ),
     );
   }
@@ -91,32 +102,48 @@ class _PerfilPageState extends State<PerfilPage> {
         content: TextField(
           controller: expController,
           decoration: const InputDecoration(
-            hintText: 'Digite a experiência',
+            hintText: 'Ex: Desenvolvedor Mobile - 2 anos',
+            border: OutlineInputBorder(),
           ),
+          maxLines: 2,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('Cancelar'),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () {
-              if (expController.text.trim().isNotEmpty) {
+              final texto = expController.text.trim();
+              if (texto.isNotEmpty) {
                 setState(() {
-                  experiencias.add(expController.text.trim());
+                  experiencias.add(texto);
                 });
+                Navigator.pop(context);
               }
-              Navigator.pop(context);
             },
             child: const Text('Adicionar'),
           ),
         ],
       ),
-    );
+    ).then((_) => expController.dispose());
+  }
+
+  void removerExperiencia(String experiencia) {
+    setState(() {
+      experiencias.remove(experiencia);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    // Enquanto a box não carrega, mostramos um indicador de progresso
+    if (box == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFF2E4A5A),
       appBar: AppBar(
@@ -124,24 +151,33 @@ class _PerfilPageState extends State<PerfilPage> {
         elevation: 0,
         centerTitle: true,
         title: const Text(
-          'Perfil',
-          style: TextStyle(color: Colors.white),
+          'Perfil Profissional',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
         iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            onPressed: salvarDados,
+            icon: const Icon(Icons.save),
+          ),
+        ],
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Center(
           child: Container(
-            width: 350,
-            padding: const EdgeInsets.all(18),
+            constraints: const BoxConstraints(maxWidth: 450),
+            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: Colors.blueAccent,
-                width: 2,
-              ),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,38 +187,35 @@ class _PerfilPageState extends State<PerfilPage> {
                     GestureDetector(
                       onTap: escolherImagem,
                       child: CircleAvatar(
-                        radius: 45,
-                        backgroundColor: Colors.grey[300],
-                        backgroundImage:
-                            imagem != null ? FileImage(imagem!) : null,
+                        radius: 50,
+                        backgroundColor: Colors.blueAccent.withOpacity(0.1),
+                        backgroundImage: imagem != null ? FileImage(imagem!) : null,
                         child: imagem == null
-                            ? const Icon(
-                                Icons.camera_alt,
-                                size: 32,
-                                color: Colors.black54,
-                              )
+                            ? const Icon(Icons.add_a_photo, size: 35, color: Colors.blueAccent)
                             : null,
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 20),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Nome do usuário',
-                            style: TextStyle(
+                          Text(
+                            nomeController.text.isEmpty ? 'Seu Nome' : nomeController.text,
+                            style: const TextStyle(
+                              fontSize: 22,
                               fontWeight: FontWeight.bold,
+                              color: Color(0xFF2E4A5A),
                             ),
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 8),
                           TextField(
                             controller: nomeController,
+                            onChanged: (val) => setState(() {}), // Atualiza o nome no topo em tempo real
                             decoration: InputDecoration(
-                              hintText: 'Digite seu nome',
+                              hintText: 'Nome completo',
                               filled: true,
-                              fillColor: const Color(0xFFBFE3DD),
-                              suffixIcon: const Icon(Icons.edit),
+                              fillColor: Colors.grey[50],
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide: BorderSide.none,
@@ -194,146 +227,82 @@ class _PerfilPageState extends State<PerfilPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
-                const Text(
-                  'Descrição',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 30),
+                const Text('Sobre mim', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 10),
                 TextField(
                   controller: descricaoController,
                   maxLines: 4,
                   decoration: InputDecoration(
-                    hintText: 'Fale sobre você...',
+                    hintText: 'Habilidades e resumo...',
                     filled: true,
-                    fillColor: Colors.grey[300],
+                    fillColor: Colors.grey[50],
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
-                const Text(
-                  'Experiências',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                const SizedBox(height: 30),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Experiências', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    ElevatedButton.icon(
+                      onPressed: adicionarExperiencia,
+                      icon: const Icon(Icons.add, size: 16),
+                      label: const Text('Add'),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 10),
-                ...experiencias.map(
-                  (exp) => Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(child: Text(exp)),
-                        IconButton(
-                          onPressed: () {
-                            setState(() {
-                              experiencias.remove(exp);
-                            });
-                          },
-                          icon: const Icon(
-                            Icons.delete,
-                            color: Colors.red,
-                          ),
-                        ),
-                      ],
+                ...experiencias.map((exp) => Card(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  child: ListTile(
+                    title: Text(exp),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () => removerExperiencia(exp),
                     ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Center(
-                  child: ElevatedButton.icon(
-                    onPressed: adicionarExperiencia,
-                    icon: const Icon(Icons.add),
-                    label: const Text('Adicionar experiência'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                const Text(
-                  'Contato',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                )),
+                const SizedBox(height: 30),
+                const Text('Contato', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 10),
                 TextField(
                   controller: telefoneController,
                   keyboardType: TextInputType.phone,
                   decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.phone),
                     hintText: 'Telefone',
-                    prefixIcon: const Icon(
-                      Icons.phone,
-                      color: Colors.green,
-                    ),
                     filled: true,
-                    fillColor: Colors.grey[300],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
+                    fillColor: Colors.grey[50],
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 TextField(
                   controller: emailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
-                    hintText: 'Email',
-                    prefixIcon: const Icon(
-                      Icons.email,
-                      color: Colors.indigo,
-                    ),
+                    prefixIcon: const Icon(Icons.email),
+                    hintText: 'E-mail',
                     filled: true,
-                    fillColor: Colors.grey[300],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
+                    fillColor: Colors.grey[50],
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                   ),
                 ),
-                const SizedBox(height: 28),
+                const SizedBox(height: 30),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: salvarDados,
                     style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.all(16),
                       backgroundColor: Colors.blueAccent,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
                     ),
-                    child: const Text(
-                      'Salvar',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    child: const Text('SALVAR PERFIL'),
                   ),
                 ),
               ],

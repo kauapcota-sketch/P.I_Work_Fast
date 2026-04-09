@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:workfast/perfil.dart';
 
 void main() {
   runApp(const busctrabalho());
@@ -33,9 +34,19 @@ class TelaLista extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Icon(Icons.settings, color: Colors.white),
-                  const CircleAvatar(
-                    backgroundImage:
-                        NetworkImage('https://i.pravatar.cc/100'),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const PerfilPage(),
+                        ),
+                      );
+                    },
+                    child: const CircleAvatar(
+                      backgroundImage:
+                          NetworkImage('https://i.pravatar.cc/100'),
+                    ),
                   ),
                 ],
               ),
@@ -122,7 +133,163 @@ class TelaLista extends StatelessWidget {
   }
 }
 
-// 🧩 CARD MODERNO
+// 🧩 NOVA TELA DE PERFIL
+class PerfilScreen extends StatelessWidget {
+  const PerfilScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF2C3E50),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              // 🔙 BOTÃO VOLTAR
+              Row(
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                  ),
+                  const SizedBox(width: 10),
+                  const Text(
+                    'Meu Perfil',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 40),
+
+              // 👤 FOTO DE PERFIL GRANDE
+              const CircleAvatar(
+                radius: 60,
+                backgroundImage: NetworkImage('https://i.pravatar.cc/100'),
+              ),
+
+              const SizedBox(height: 20),
+
+              // 📝 NOME E PROFISSÃO
+              const Text(
+                'João Silva',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                'Desenvolvedor Flutter',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 16,
+                ),
+              ),
+
+              const SizedBox(height: 40),
+
+              // 📋 INFORMAÇÕES DO PERFIL
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Informações',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF2C3E50),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      
+                      _infoRow(Icons.phone, '31 99999-9999'),
+                      _infoRow(Icons.email, 'joao.silva@email.com'),
+                      _infoRow(Icons.location_on, 'Belo Horizonte, MG'),
+                      _infoRow(Icons.work, 'Desenvolvedor Sênior'),
+
+                      const Spacer(),
+
+                      // 🔧 BOTÕES DE AÇÃO
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () {},
+                              icon: const Icon(Icons.edit),
+                              label: const Text('Editar'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.blueAccent,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              onPressed: () {},
+                              icon: const Icon(Icons.logout),
+                              label: const Text('Sair'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.redAccent,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _infoRow(IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.grey.shade600, size: 24),
+          const SizedBox(width: 12),
+          Text(
+            text,
+            style: const TextStyle(
+              fontSize: 16,
+              color: Color(0xFF2C3E50),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// 🧩 CARD MODERNO (mantido igual)
 class CardChamado extends StatelessWidget {
   final String nome;
   final String descricao;
