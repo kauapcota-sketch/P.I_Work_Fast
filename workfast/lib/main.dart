@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:seu_app_nome/cadastro.dart';
-import 'package:seu_app_nome/login.dart';
+import 'package:workfast/cadastro.dart';
+import 'package:workfast/login.dart';
 
 
 void main() => runApp(const MyApp());
