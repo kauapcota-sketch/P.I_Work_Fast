@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:workfast/Eletrica_trabalho.dart';
 import 'package:workfast/buscar_trabalho.dart';
 import 'package:workfast/estrutural_trabalho.dart';
+import 'package:workfast/informatica_trabalho.dart';
 import 'package:workfast/perfil.dart';
 
 void main() {
-  runApp(const InformaticaTrabalho());
+  runApp(const EletricaTrabalho());
 }
 
-class InformaticaTrabalho extends StatelessWidget {
-  const InformaticaTrabalho({super.key});
+class EletricaTrabalho extends StatelessWidget {
+  const EletricaTrabalho({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -63,10 +63,10 @@ class TelaLista extends StatelessWidget {
                   children: [
                     TextButton(
                      onPressed: () {
-                         Navigator.push(
+                       Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => busctrabalho()),
-                      );
+                      ); 
                      },
                      style: TextButton.styleFrom(
                        padding: EdgeInsets.zero,
@@ -87,7 +87,10 @@ class TelaLista extends StatelessWidget {
 
                     TextButton(
                      onPressed: () {
-                      
+                        Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => InformaticaTrabalho()),
+                      );
                      },
                      style: TextButton.styleFrom(
                        padding: EdgeInsets.zero, 
@@ -96,7 +99,7 @@ class TelaLista extends StatelessWidget {
                        margin: const EdgeInsets.only(right: 10),
                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                        decoration: BoxDecoration(
-                         color:  const Color.fromARGB(0, 255, 255, 255),
+                         color: Colors.white10,
                          borderRadius: BorderRadius.circular(20),
                        ),
                        child: Text(
@@ -108,10 +111,7 @@ class TelaLista extends StatelessWidget {
 
                     TextButton(
                      onPressed: () {
-                         Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => EletricaTrabalho()),
-                      );
+                       
                      },
                      style: TextButton.styleFrom(
                        padding: EdgeInsets.zero, 
@@ -120,7 +120,7 @@ class TelaLista extends StatelessWidget {
                        margin: const EdgeInsets.only(right: 10),
                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                        decoration: BoxDecoration(
-                         color:  Colors.white10,
+                         color: const Color.fromARGB(0, 255, 255, 255),
                          borderRadius: BorderRadius.circular(20),
                        ),
                        child: Text(
@@ -131,7 +131,7 @@ class TelaLista extends StatelessWidget {
                     ),
                     TextButton(
                      onPressed: () {
-                         Navigator.push(
+                        Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => EstruturalTrabalho()),
                       );
@@ -143,7 +143,7 @@ class TelaLista extends StatelessWidget {
                        margin: const EdgeInsets.only(right: 10),
                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                        decoration: BoxDecoration(
-                         color: Colors.white10,
+                         color:  Colors.white10,
                          borderRadius: BorderRadius.circular(20),
                        ),
                        child: Text(

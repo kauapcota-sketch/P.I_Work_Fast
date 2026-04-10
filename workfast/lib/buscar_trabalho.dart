@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:workfast/estrutural_trabalho.dart';
+import 'package:workfast/informatica_trabalho.dart';
 import 'package:workfast/perfil.dart';
 
 void main() {
@@ -69,7 +71,7 @@ class TelaLista extends StatelessWidget {
                        margin: const EdgeInsets.only(right: 10),
                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                        decoration: BoxDecoration(
-                         color: Colors.white10,
+                         color: const Color.fromARGB(0, 255, 255, 255),
                          borderRadius: BorderRadius.circular(20),
                        ),
                        child: Text(
@@ -81,6 +83,10 @@ class TelaLista extends StatelessWidget {
 
                     TextButton(
                      onPressed: () {
+                      Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => InformaticaTrabalho()),
+                      );
                        
                      },
                      style: TextButton.styleFrom(
@@ -122,7 +128,10 @@ class TelaLista extends StatelessWidget {
                     ),
                     TextButton(
                      onPressed: () {
-                       
+                        Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => EstruturalTrabalho()),
+                      );
                      },
                      style: TextButton.styleFrom(
                        padding: EdgeInsets.zero, 
