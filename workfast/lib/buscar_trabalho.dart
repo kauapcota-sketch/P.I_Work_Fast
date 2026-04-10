@@ -3,6 +3,7 @@ import 'package:workfast/Eletrica_trabalho.dart';
 import 'package:workfast/estrutural_trabalho.dart';
 import 'package:workfast/informatica_trabalho.dart';
 import 'package:workfast/perfil.dart';
+import 'package:workfast/registrar_problema_page.dart'; // ✅ IMPORT ADICIONADO
 
 void main() {
   runApp(const busctrabalho());
@@ -56,112 +57,40 @@ class TelaLista extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              //  CATEGORIAS
+              // 🏷️ CATEGORIAS
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    TextButton(
-                     onPressed: () {
-                       
-                     },
-                     style: TextButton.styleFrom(
-                       padding: EdgeInsets.zero,
-                     ),
-                     child: Container(
-                       margin: const EdgeInsets.only(right: 10),
-                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                       decoration: BoxDecoration(
-                         color: const Color.fromARGB(0, 255, 255, 255),
-                         borderRadius: BorderRadius.circular(20),
-                       ),
-                       child: Text(
-                         "Geral",
-                         style: const TextStyle(color: Colors.white),
-                       ),
-                     ),
-                    ),
-
-                    TextButton(
-                     onPressed: () {
+                    _categoriaButton('Geral', Colors.grey, () {}),
+                    _categoriaButton('Informática', Colors.blue, () {
                       Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => InformaticaTrabalho()),
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => InformaticaTrabalho()),
                       );
-                       
-                     },
-                     style: TextButton.styleFrom(
-                       padding: EdgeInsets.zero, 
-                     ),
-                     child: Container(
-                       margin: const EdgeInsets.only(right: 10),
-                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                       decoration: BoxDecoration(
-                         color: Colors.white10,
-                         borderRadius: BorderRadius.circular(20),
-                       ),
-                       child: Text(
-                         "Informática",
-                         style: const TextStyle(color: Colors.white),
-                       ),
-                     ),
-                    ),
-
-                    TextButton(
-                     onPressed: () {
-                         Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => EletricaTrabalho()),
+                    }),
+                    _categoriaButton('Elétrica', Colors.orange, () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => EletricaTrabalho()),
                       );
-                     },
-                     style: TextButton.styleFrom(
-                       padding: EdgeInsets.zero, 
-                     ),
-                     child: Container(
-                       margin: const EdgeInsets.only(right: 10),
-                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                       decoration: BoxDecoration(
-                         color: Colors.white10,
-                         borderRadius: BorderRadius.circular(20),
-                       ),
-                       child: Text(
-                         "Elétrica",
-                         style: const TextStyle(color: Colors.white),
-                       ),
-                     ),
-                    ),
-                    TextButton(
-                     onPressed: () {
-                        Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => EstruturalTrabalho()),
+                    }),
+                    _categoriaButton('Estrutural', Colors.green, () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => EstruturalTrabalho()),
                       );
-                     },
-                     style: TextButton.styleFrom(
-                       padding: EdgeInsets.zero, 
-                     ),
-                     child: Container(
-                       margin: const EdgeInsets.only(right: 10),
-                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                       decoration: BoxDecoration(
-                         color: Colors.white10,
-                         borderRadius: BorderRadius.circular(20),
-                       ),
-                       child: Text(
-                         "Estrutural",
-                         style: const TextStyle(color: Colors.white),
-                       ),
-                     ),
-                    ),
+                    }),
                   ],
                 ),
               ),
 
-              
-
               const SizedBox(height: 20),
 
-              //  LISTA
+              // 📋 LISTA DE CHAMADOS
               Expanded(
                 child: ListView(
                   children: const [
@@ -181,7 +110,7 @@ class TelaLista extends StatelessWidget {
                     ),
                     SizedBox(height: 15),
                     CardChamado(
-                      nome: 'Italo freitas',
+                      nome: 'Italo Freitas',
                       descricao: 'Preciso trocar a cor da minha casa.',
                       telefone: '31 7690-6743',
                       email: 'Italo@gmail.com.br',
@@ -189,13 +118,14 @@ class TelaLista extends StatelessWidget {
                     SizedBox(height: 15),
                     CardChamado(
                       nome: 'Mariana Borges',
-                      descricao: 'Preciso de um desenvolvedor para montar um site.',
+                      descricao:
+                          'Preciso de um desenvolvedor para montar um site.',
                       telefone: '31 8701-7853',
                       email: 'Mariana@gmail.com.br',
                     ),
                     SizedBox(height: 15),
                     CardChamado(
-                      nome: 'Rayanne silva',
+                      nome: 'Rayanne Silva',
                       descricao: 'Meu micro-ondas quebrou.',
                       telefone: '31 9612-3370',
                       email: 'rayanne@gmail.com.br',
@@ -204,24 +134,52 @@ class TelaLista extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(height: 10),
+              const SizedBox(height: 20), // ✅ MAIS ESPAÇO
 
-              // 📸 BOTÃO INFERIOR
-              Container(
-                height: 60,
-                decoration: BoxDecoration(
-                  color: Colors.blueAccent,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.blueAccent.withOpacity(0.4),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    )
-                  ],
-                ),
-                child: const Center(
-                  child: Icon(Icons.camera_alt, size: 28, color: Colors.white),
+              // 📸 BOTÃO INFERIOR - REGISTRA PROBLEMA ✅
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          const registraProblema(), // ✅ LINKADO
+                    ),
+                  );
+                },
+                child: Container(
+                  height: 70, // ✅ MAIOR E MAIS TOCÁVEL
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Colors.blueAccent, Colors.blue],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blueAccent.withOpacity(0.5),
+                        blurRadius: 15,
+                        offset: const Offset(0, 8),
+                      )
+                    ],
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.camera_alt, size: 28, color: Colors.white),
+                      SizedBox(width: 12),
+                      Text(
+                        'REGISTRAR PROBLEMA',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               )
             ],
@@ -231,160 +189,26 @@ class TelaLista extends StatelessWidget {
     );
   }
 
-  
-}
-
-// NOVA TELA DE PERFIL
-class PerfilScreen extends StatelessWidget {
-  const PerfilScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF2C3E50),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              //  BOTÃO VOLTAR
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
-                  ),
-                  const SizedBox(width: 10),
-                  const Text(
-                    'Meu Perfil',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 40),
-
-              //  FOTO DE PERFIL GRANDE
-              const CircleAvatar(
-                radius: 60,
-                backgroundImage: NetworkImage('https://i.pravatar.cc/100'),
-              ),
-
-              const SizedBox(height: 20),
-
-              //  NOME E PROFISSÃO
-              const Text(
-                'João Silva',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                'Desenvolvedor Flutter',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 16,
-                ),
-              ),
-
-              const SizedBox(height: 40),
-
-              // 📋 INFORMAÇÕES DO PERFIL
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Informações',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF2C3E50),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      
-                      _infoRow(Icons.phone, '31 99999-9999'),
-                      _infoRow(Icons.email, 'joao.silva@email.com'),
-                      _infoRow(Icons.location_on, 'Belo Horizonte, MG'),
-                      _infoRow(Icons.work, 'Desenvolvedor Sênior'),
-
-                      const Spacer(),
-
-                      //  BOTÕES DE AÇÃO
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: () {},
-                              icon: const Icon(Icons.edit),
-                              label: const Text('Editar'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blueAccent,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: () {},
-                              icon: const Icon(Icons.logout),
-                              label: const Text('Sair'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.redAccent,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+  // 🔧 WIDGET REUTILIZÁVEL PARA CATEGORIAS
+  Widget _categoriaButton(String texto, Color cor, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(right: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: cor.withOpacity(0.2),
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(color: cor.withOpacity(0.3), width: 1),
+        ),
+        child: Text(
+          texto,
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _infoRow(IconData icon, String text) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.grey.shade600, size: 24),
-          const SizedBox(width: 12),
-          Text(
-            text,
-            style: const TextStyle(
-              fontSize: 16,
-              color: Color(0xFF2C3E50),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -430,63 +254,76 @@ class CardChamado extends StatelessWidget {
                 radius: 18,
                 backgroundColor: Colors.blueAccent,
                 child: Text(
-                  nome[0],
-                  style: const TextStyle(color: Colors.white),
+                  nome[0].toUpperCase(),
+                  style: const TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
-              const SizedBox(width: 10),
-              Text(
-                nome,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      nome,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      'Chamado #${DateTime.now().millisecondsSinceEpoch.toString().substring(8, 11)}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
                 ),
               )
             ],
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
 
           // 📞 CONTATO
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: Colors.grey.shade50,
               borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade200),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                Text(telefone),
-                Text(
-                  email,
-                  style: const TextStyle(fontSize: 12),
+                Icon(Icons.call, color: Colors.green, size: 20),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(telefone,
+                          style: const TextStyle(fontWeight: FontWeight.w600)),
+                      Text(email,
+                          style: TextStyle(fontSize: 12, color: Colors.grey)),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
 
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
 
           // 📝 DESCRIÇÃO
           Text(
             descricao,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-
-          const SizedBox(height: 6),
-
-          const Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              'Ler mais...',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.blueAccent,
-              ),
+            style: TextStyle(
+              fontSize: 14,
+              height: 1.4,
+              color: Colors.grey.shade700,
             ),
-          )
+          ),
         ],
       ),
     );
