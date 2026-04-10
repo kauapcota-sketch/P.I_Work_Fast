@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:workfast/perfil.dart';
+import 'package:workfast/registrar_problema_page.dart';
 
 void main() {
   runApp(const busctrabalho());
@@ -29,7 +30,7 @@ class TelaLista extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              // 🔝 TOPO
+              // TOPO
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -53,7 +54,7 @@ class TelaLista extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              //  CATEGORIAS
+              // CATEGORIAS
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -68,14 +69,14 @@ class TelaLista extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              //  LISTA
+              // LISTA DE CHAMADOS
               Expanded(
                 child: ListView(
                   children: const [
                     CardChamado(
                       nome: 'Paulo Henrique',
                       descricao:
-                          'Meu computador desligou de repente e agora nao liga mais.',
+                          'Meu computador desligou de repente e agora não liga mais.',
                       telefone: '31 5983-1047',
                       email: 'paulo@gmail.com.br',
                     ),
@@ -88,21 +89,22 @@ class TelaLista extends StatelessWidget {
                     ),
                     SizedBox(height: 15),
                     CardChamado(
-                      nome: 'Italo freitas',
+                      nome: 'Ítalo Freitas',
                       descricao: 'Preciso trocar a cor da minha casa.',
                       telefone: '31 7690-6743',
-                      email: 'Italo@gmail.com.br',
+                      email: 'italo@gmail.com.br',
                     ),
                     SizedBox(height: 15),
                     CardChamado(
                       nome: 'Mariana Borges',
-                      descricao: 'Preciso de um desenvolvedor para montar um site.',
+                      descricao:
+                          'Preciso de um desenvolvedor para montar um site.',
                       telefone: '31 8701-7853',
-                      email: 'Mariana@gmail.com.br',
+                      email: 'mariana@gmail.com.br',
                     ),
                     SizedBox(height: 15),
                     CardChamado(
-                      nome: 'Rayanne silva',
+                      nome: 'Rayanne Silva',
                       descricao: 'Meu micro-ondas quebrou.',
                       telefone: '31 9612-3370',
                       email: 'rayanne@gmail.com.br',
@@ -113,24 +115,38 @@ class TelaLista extends StatelessWidget {
 
               const SizedBox(height: 10),
 
-              // 📸 BOTÃO INFERIOR
-              Container(
-                height: 60,
-                decoration: BoxDecoration(
-                  color: Colors.blueAccent,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.blueAccent.withOpacity(0.4),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    )
-                  ],
+              // BOTÃO INFERIOR
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const registraProblema(),
+                    ),
+                  );
+                },
+                child: Container(
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.blueAccent,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blueAccent.withOpacity(0.4),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: const Center(
+                    child: Icon(
+                      Icons.camera_alt,
+                      size: 28,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
-                child: const Center(
-                  child: Icon(Icons.camera_alt, size: 28, color: Colors.white),
-                ),
-              )
+              ),
             ],
           ),
         ),
@@ -138,7 +154,7 @@ class TelaLista extends StatelessWidget {
     );
   }
 
-  Widget _chip(String text) {
+  static Widget _chip(String text) {
     return Container(
       margin: const EdgeInsets.only(right: 10),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -148,169 +164,15 @@ class TelaLista extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: const TextStyle(color: Colors.white),
-      ),
-    );
-  }
-}
-
-// NOVA TELA DE PERFIL
-class PerfilScreen extends StatelessWidget {
-  const PerfilScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF2C3E50),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              //  BOTÃO VOLTAR
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
-                  ),
-                  const SizedBox(width: 10),
-                  const Text(
-                    'Meu Perfil',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 40),
-
-              //  FOTO DE PERFIL GRANDE
-              const CircleAvatar(
-                radius: 60,
-                backgroundImage: NetworkImage('https://i.pravatar.cc/100'),
-              ),
-
-              const SizedBox(height: 20),
-
-              //  NOME E PROFISSÃO
-              const Text(
-                'João Silva',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                'Desenvolvedor Flutter',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 16,
-                ),
-              ),
-
-              const SizedBox(height: 40),
-
-              // 📋 INFORMAÇÕES DO PERFIL
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Informações',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF2C3E50),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      
-                      _infoRow(Icons.phone, '31 99999-9999'),
-                      _infoRow(Icons.email, 'joao.silva@email.com'),
-                      _infoRow(Icons.location_on, 'Belo Horizonte, MG'),
-                      _infoRow(Icons.work, 'Desenvolvedor Sênior'),
-
-                      const Spacer(),
-
-                      //  BOTÕES DE AÇÃO
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: () {},
-                              icon: const Icon(Icons.edit),
-                              label: const Text('Editar'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blueAccent,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: () {},
-                              icon: const Icon(Icons.logout),
-                              label: const Text('Sair'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.redAccent,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w500,
         ),
       ),
     );
   }
-
-  Widget _infoRow(IconData icon, String text) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.grey.shade600, size: 24),
-          const SizedBox(width: 12),
-          Text(
-            text,
-            style: const TextStyle(
-              fontSize: 16,
-              color: Color(0xFF2C3E50),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
-// 🧩 CARD MODERNO (mantido igual)
 class CardChamado extends StatelessWidget {
   final String nome;
   final String descricao;
@@ -337,13 +199,13 @@ class CardChamado extends StatelessWidget {
             color: Colors.black.withOpacity(0.15),
             blurRadius: 10,
             offset: const Offset(0, 6),
-          )
+          ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 👤 NOME
+          // NOME
           Row(
             children: [
               CircleAvatar(
@@ -355,19 +217,21 @@ class CardChamado extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              Text(
-                nome,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+              Expanded(
+                child: Text(
+                  nome,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              )
+              ),
             ],
           ),
 
           const SizedBox(height: 12),
 
-          // 📞 CONTATO
+          // CONTATO
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
@@ -388,11 +252,12 @@ class CardChamado extends StatelessWidget {
 
           const SizedBox(height: 10),
 
-          // 📝 DESCRIÇÃO
+          // DESCRIÇÃO
           Text(
             descricao,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 14),
           ),
 
           const SizedBox(height: 6),
@@ -404,9 +269,10 @@ class CardChamado extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 color: Colors.blueAccent,
+                fontWeight: FontWeight.w600,
               ),
             ),
-          )
+          ),
         ],
       ),
     );
