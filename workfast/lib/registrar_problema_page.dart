@@ -3,6 +3,22 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+void main() {
+  runApp(const registraProblema());
+}
+
+class registraProblema extends StatelessWidget {
+  const registraProblema({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: RegistrarProblemaPage(),
+    );
+  }
+}
+
 class RegistrarProblemaPage extends StatefulWidget {
   const RegistrarProblemaPage({super.key});
 
@@ -24,10 +40,8 @@ class _RegistrarProblemaPageState extends State<RegistrarProblemaPage> {
 
   final List<Map<String, String>> categorias = [
     {'nome': 'Elétrica', 'emoji': '🟡'},
-    {'nome': 'Hidráulica', 'emoji': '🔵'},
     {'nome': 'Estrutural', 'emoji': '🟤'},
     {'nome': 'Informática', 'emoji': '🖥️'},
-    {'nome': 'Limpeza', 'emoji': '🧹'},
     {'nome': 'Outro', 'emoji': '❓'},
   ];
 
@@ -73,48 +87,51 @@ ${imagemSelecionada != null ? '\n*Foto do problema anexada*' : ''}
 
     setState(() => isLoading = true);
 
-  try {
-    Uri uri;
-    
-    switch (formaContato) {
-      case 'Whatsapp':
-        final numero = contato.replaceAll(RegExp(r'[^0-9]'), '');
-        uri = Uri.parse('https://wa.me/$numero?text=${Uri.encodeComponent(mensagem)}');
-        break;
-      case 'Telefone':
-        final numero = contato.replaceAll(RegExp(r'[^0-9]'), '');
-        uri = Uri.parse('tel:$numero');
-        break;
-      case 'Email':
-        uri = Uri(
-          scheme: 'mailto',
-          path: contato,
-          queryParameters: {
-            'subject': 'Problema: $categoriaEscolhida',
-            'body': mensagem,
-          },
-        );
-        break;
-      default:
-        throw Exception('Forma de contato inválida');
-    }
+    try {
+      Uri uri;
 
-    // Remove canLaunchUrl - o try/catch cuida dos erros
-    if (mounted) {
-      await launchUrl(
-        uri,
-        mode: LaunchMode.externalApplication,
-      );
-      mostrarSnack('Problema enviado com sucesso!');
+      switch (formaContato) {
+        case 'Whatsapp':
+          final numero = contato.replaceAll(RegExp(r'[^0-9]'), '');
+          uri = Uri.parse(
+              'https://wa.me/$numero?text=${Uri.encodeComponent(mensagem)}');
+          break;
+        case 'Telefone':
+          final numero = contato.replaceAll(RegExp(r'[^0-9]'), '');
+          uri = Uri.parse('tel:$numero');
+          break;
+        case 'Email':
+          uri = Uri(
+            scheme: 'mailto',
+            path: contato,
+            queryParameters: {
+              'subject': 'Problema: $categoriaEscolhida',
+              'body': mensagem,
+            },
+          );
+          break;
+        default:
+          throw Exception('Forma de contato inválida');
+      }
+
+      // Remove canLaunchUrl - o try/catch cuida dos erros
+      if (mounted) {
+        await launchUrl(
+          uri,
+          mode: LaunchMode.externalApplication,
+        );
+        mostrarSnack('Problema enviado com sucesso!');
+      }
+    } catch (e) {
+      if (mounted) {
+        mostrarSnack(
+            'Não foi possível enviar. Verifique sua conexão ou app instalado.',
+            erro: true);
+      }
+    } finally {
+      if (mounted) setState(() => isLoading = false);
     }
-  } catch (e) {
-    if (mounted) {
-      mostrarSnack('Não foi possível enviar. Verifique sua conexão ou app instalado.', erro: true);
-    }
-  } finally {
-    if (mounted) setState(() => isLoading = false);
   }
-}
 
   void mostrarSnack(String texto, {bool erro = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -177,13 +194,15 @@ ${imagemSelecionada != null ? '\n*Foto do problema anexada*' : ''}
                   context: context,
                   backgroundColor: Colors.grey[100],
                   shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(20)),
                   ),
                   builder: (_) => SafeArea(
                     child: Wrap(
                       children: [
                         ListTile(
-                          leading: const Icon(Icons.camera_alt, color: Colors.blue),
+                          leading:
+                              const Icon(Icons.camera_alt, color: Colors.blue),
                           title: const Text('Tirar foto'),
                           onTap: () {
                             Navigator.pop(context);
@@ -191,7 +210,8 @@ ${imagemSelecionada != null ? '\n*Foto do problema anexada*' : ''}
                           },
                         ),
                         ListTile(
-                          leading: const Icon(Icons.photo_library, color: Colors.blue),
+                          leading: const Icon(Icons.photo_library,
+                              color: Colors.blue),
                           title: const Text('Escolher da galeria'),
                           onTap: () {
                             Navigator.pop(context);
@@ -209,8 +229,8 @@ ${imagemSelecionada != null ? '\n*Foto do problema anexada*' : ''}
                     color: Colors.grey[50],
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
-                      color: imagemSelecionada != null 
-                          ? Colors.green 
+                      color: imagemSelecionada != null
+                          ? Colors.green
                           : Colors.blue.withOpacity(0.5),
                       width: 2,
                     ),
@@ -219,7 +239,8 @@ ${imagemSelecionada != null ? '\n*Foto do problema anexada*' : ''}
                       ? const Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.add_a_photo, size: 48, color: Colors.grey),
+                            Icon(Icons.add_a_photo,
+                                size: 48, color: Colors.grey),
                             SizedBox(height: 8),
                             Text(
                               'Toque para adicionar foto',
@@ -242,7 +263,8 @@ ${imagemSelecionada != null ? '\n*Foto do problema anexada*' : ''}
                               top: 8,
                               right: 8,
                               child: GestureDetector(
-                                onTap: () => setState(() => imagemSelecionada = null),
+                                onTap: () =>
+                                    setState(() => imagemSelecionada = null),
                                 child: Container(
                                   padding: const EdgeInsets.all(4),
                                   decoration: const BoxDecoration(
@@ -262,7 +284,7 @@ ${imagemSelecionada != null ? '\n*Foto do problema anexada*' : ''}
                 ),
               ),
               const SizedBox(height: 24),
-              
+
               // Description
               const Text(
                 'Descrição do problema',
@@ -283,7 +305,7 @@ ${imagemSelecionada != null ? '\n*Foto do problema anexada*' : ''}
                 ),
               ),
               const SizedBox(height: 24),
-              
+
               // Category
               const Text(
                 'Categoria',
@@ -321,7 +343,7 @@ ${imagemSelecionada != null ? '\n*Foto do problema anexada*' : ''}
                 ),
               ),
               const SizedBox(height: 24),
-              
+
               // Contact method
               const Text(
                 'Forma de contato',
@@ -339,7 +361,8 @@ ${imagemSelecionada != null ? '\n*Foto do problema anexada*' : ''}
                           'Email' => Icons.email,
                           _ => Icons.contact_mail,
                         },
-                        color: formaContato == item ? Colors.green : Colors.grey,
+                        color:
+                            formaContato == item ? Colors.green : Colors.grey,
                       ),
                       const SizedBox(width: 12),
                       Text(item),
@@ -356,7 +379,7 @@ ${imagemSelecionada != null ? '\n*Foto do problema anexada*' : ''}
                   },
                 );
               }),
-              
+
               const SizedBox(height: 12),
               TextField(
                 controller: contatoController,
@@ -382,7 +405,7 @@ ${imagemSelecionada != null ? '\n*Foto do problema anexada*' : ''}
                 ),
               ),
               const SizedBox(height: 32),
-              
+
               // Send button
               SizedBox(
                 width: double.infinity,
