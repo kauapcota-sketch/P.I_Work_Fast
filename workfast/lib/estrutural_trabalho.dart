@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:workfast/Eletrica_trabalho.dart';
 import 'package:workfast/buscar_trabalho.dart';
-import 'package:workfast/estrutural_trabalho.dart';
+import 'package:workfast/informatica_trabalho.dart';
 import 'package:workfast/perfil.dart';
 
 void main() {
-  runApp(const InformaticaTrabalho());
+  runApp(const EstruturalTrabalho());
 }
 
-class InformaticaTrabalho extends StatelessWidget {
-  const InformaticaTrabalho({super.key});
+class EstruturalTrabalho extends StatelessWidget {
+  const EstruturalTrabalho({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -63,10 +63,10 @@ class TelaLista extends StatelessWidget {
                   children: [
                     TextButton(
                      onPressed: () {
-                         Navigator.push(
+                       Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => busctrabalho()),
-                      );
+                      ); 
                      },
                      style: TextButton.styleFrom(
                        padding: EdgeInsets.zero,
@@ -87,7 +87,10 @@ class TelaLista extends StatelessWidget {
 
                     TextButton(
                      onPressed: () {
-                      
+                        Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => InformaticaTrabalho()),
+                      );
                      },
                      style: TextButton.styleFrom(
                        padding: EdgeInsets.zero, 
@@ -96,7 +99,7 @@ class TelaLista extends StatelessWidget {
                        margin: const EdgeInsets.only(right: 10),
                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                        decoration: BoxDecoration(
-                         color:  const Color.fromARGB(0, 255, 255, 255),
+                         color: Colors.white10,
                          borderRadius: BorderRadius.circular(20),
                        ),
                        child: Text(
@@ -108,7 +111,7 @@ class TelaLista extends StatelessWidget {
 
                     TextButton(
                      onPressed: () {
-                         Navigator.push(
+                        Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => EletricaTrabalho()),
                       );
@@ -120,7 +123,7 @@ class TelaLista extends StatelessWidget {
                        margin: const EdgeInsets.only(right: 10),
                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                        decoration: BoxDecoration(
-                         color:  Colors.white10,
+                         color: Colors.white10,
                          borderRadius: BorderRadius.circular(20),
                        ),
                        child: Text(
@@ -131,10 +134,7 @@ class TelaLista extends StatelessWidget {
                     ),
                     TextButton(
                      onPressed: () {
-                         Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => EstruturalTrabalho()),
-                      );
+                       
                      },
                      style: TextButton.styleFrom(
                        padding: EdgeInsets.zero, 
@@ -143,7 +143,7 @@ class TelaLista extends StatelessWidget {
                        margin: const EdgeInsets.only(right: 10),
                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                        decoration: BoxDecoration(
-                         color: Colors.white10,
+                         color: const Color.fromARGB(0, 255, 255, 255),
                          borderRadius: BorderRadius.circular(20),
                        ),
                        child: Text(
@@ -165,39 +165,39 @@ class TelaLista extends StatelessWidget {
                 child: ListView(
                   children: const [
                     CardChamado(
-                      nome: 'Paulo Henrique',
+                      nome: 'João Pereira',
                       descricao:
-                          'Meu computador desligou de repente e agora nao liga mais.',
-                      telefone: '31 5983-1047',
-                      email: 'paulo@gmail.com.br',
+                          'Preciso reformar meu banheiro por causa de infiltração nas paredes.',
+                      telefone: '31 5176-2094',
+                      email: 'Joao@gmail.com.br',
                     ),
                     SizedBox(height: 15),
                     CardChamado(
-                      nome: 'Marcos oliveira',
-                      descricao: 'Preciso de um criador de software.',
-                      telefone: '31 7690-4521',
-                      email: 'Marcos@gmail.com.br',
+                      nome: 'Ana Costa',
+                      descricao: 'Quero construir um muro no terreno e preciso de um pedreiro..',
+                      telefone: '31 7643-3824',
+                      email: 'AnaCosta@gmail.com.br',
                     ),
                     SizedBox(height: 15),
                     CardChamado(
-                      nome: 'João Pedro',
-                      descricao: 'Minha internet está muito lenta e cai toda hora.',
-                      telefone: '31 7842-5632',
-                      email: 'João@gmail.com.br',
+                      nome: 'Roberto Almeida',
+                      descricao: 'Minha casa está com rachaduras e preciso de avaliação estrutural.',
+                      telefone: '31 5432-1234',
+                      email: 'Roberto@gmail.com.br',
                     ),
                     SizedBox(height: 15),
                     CardChamado(
-                      nome: 'Mariana Borges',
-                      descricao: 'Preciso de um desenvolvedor para montar um site.',
-                      telefone: '31 4492-9834',
-                      email: 'Mariana@gmail.com.br',
+                      nome: 'Juliana Martins',
+                      descricao: 'Preciso trocar o telhado que está com goteiras.',
+                      telefone: '31 7843-75467',
+                      email: 'Juliana@gmail.com.br',
                     ),
                     SizedBox(height: 15),
                     CardChamado(
-                      nome: 'Carlos Henrique',
-                      descricao: 'Preciso de ajuda para remover um vírus do meu notebook.',
-                      telefone: '31 1599-3740',
-                      email: 'Carlos@gmail.com.br',
+                      nome: 'Fernando Ribeiro',
+                      descricao: 'Quero fazer uma ampliação na minha casa e preciso de orçamento.',
+                      telefone: '31 4267-6742',
+                      email: 'Fernando@gmail.com.br',
                     ),
                   ],
                 ),
