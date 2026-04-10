@@ -1,31 +1,28 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:seu_app_nome/main.dart';
-
+import 'package:workfast/buscar_trabalho.dart';
 
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('Verifica se a tela principal carrega corretamente',
+      (WidgetTester tester) async {
+    // Carrega o app
+    await tester.pumpWidget(const busctrabalho());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Verifica se as categorias aparecem
+    expect(find.text('Manutenção'), findsOneWidget);
+    expect(find.text('Pedreiro'), findsOneWidget);
+    expect(find.text('Eletricista'), findsOneWidget);
+    expect(find.text('Programação'), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    // Verifica se os nomes dos usuários aparecem
+    expect(find.text('Paulo Henrique'), findsOneWidget);
+    expect(find.text('Lucas de Oliveira'), findsOneWidget);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verifica se existe o ícone da câmera
+    expect(find.byIcon(Icons.camera_alt), findsOneWidget);
+
+    // Verifica se existe o ícone de configurações
+    expect(find.byIcon(Icons.settings), findsOneWidget);
   });
 }
