@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:workfast/Eletrica_trabalho.dart';
 import 'package:workfast/estrutural_trabalho.dart';
 import 'package:workfast/informatica_trabalho.dart';
 import 'package:workfast/perfil.dart';
@@ -108,7 +109,10 @@ class TelaLista extends StatelessWidget {
 
                     TextButton(
                      onPressed: () {
-                       
+                         Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => EletricaTrabalho()),
+                      );
                      },
                      style: TextButton.styleFrom(
                        padding: EdgeInsets.zero, 
