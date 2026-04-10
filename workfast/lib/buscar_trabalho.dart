@@ -53,7 +53,7 @@ class TelaLista extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // 📂 CATEGORIAS
+              //  CATEGORIAS
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -68,7 +68,7 @@ class TelaLista extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // 📋 LISTA
+              //  LISTA
               Expanded(
                 child: ListView(
                   children: const [
@@ -85,6 +85,27 @@ class TelaLista extends StatelessWidget {
                       descricao: 'Preciso de um analista urgente.',
                       telefone: '31 6589-5632',
                       email: 'lucas@gmail.com.br',
+                    ),
+                    SizedBox(height: 15),
+                    CardChamado(
+                      nome: 'Italo freitas',
+                      descricao: 'Preciso trocar a cor da minha casa.',
+                      telefone: '31 7690-6743',
+                      email: 'Italo@gmail.com.br',
+                    ),
+                    SizedBox(height: 15),
+                    CardChamado(
+                      nome: 'Mariana Borges',
+                      descricao: 'Preciso de um desenvolvedor para montar um site.',
+                      telefone: '31 8701-7853',
+                      email: 'Mariana@gmail.com.br',
+                    ),
+                    SizedBox(height: 15),
+                    CardChamado(
+                      nome: 'Rayanne silva',
+                      descricao: 'Meu micro-ondas quebrou.',
+                      telefone: '31 9612-3370',
+                      email: 'rayanne@gmail.com.br',
                     ),
                   ],
                 ),
@@ -133,7 +154,7 @@ class TelaLista extends StatelessWidget {
   }
 }
 
-// 🧩 NOVA TELA DE PERFIL
+// NOVA TELA DE PERFIL
 class PerfilScreen extends StatelessWidget {
   const PerfilScreen({super.key});
 
@@ -146,7 +167,7 @@ class PerfilScreen extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              // 🔙 BOTÃO VOLTAR
+              //  BOTÃO VOLTAR
               Row(
                 children: [
                   IconButton(
@@ -167,7 +188,7 @@ class PerfilScreen extends StatelessWidget {
 
               const SizedBox(height: 40),
 
-              // 👤 FOTO DE PERFIL GRANDE
+              //  FOTO DE PERFIL GRANDE
               const CircleAvatar(
                 radius: 60,
                 backgroundImage: NetworkImage('https://i.pravatar.cc/100'),
@@ -175,7 +196,7 @@ class PerfilScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // 📝 NOME E PROFISSÃO
+              //  NOME E PROFISSÃO
               const Text(
                 'João Silva',
                 style: TextStyle(
@@ -222,7 +243,7 @@ class PerfilScreen extends StatelessWidget {
 
                       const Spacer(),
 
-                      // 🔧 BOTÕES DE AÇÃO
+                      //  BOTÕES DE AÇÃO
                       Row(
                         children: [
                           Expanded(
