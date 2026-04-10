@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:workfast/cadastro.dart';
 import 'package:workfast/login.dart';
 
-
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
@@ -40,14 +39,13 @@ class TelaInicial extends StatelessWidget {
               child: Opacity(
                 opacity: 0.70,
                 child: Image.asset(
-                  'assets/logo.png',
+                  '',
                   width: 700,
                   height: 700,
                   fit: BoxFit.contain,
                 ),
               ),
             ),
-
             Center(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 30),
@@ -79,7 +77,8 @@ class TelaInicial extends StatelessWidget {
                     BotaoAnimado(
                       texto: 'LOGAR',
                       onTap: () {
-                        Navigator.pushReplacement( // ← pushReplacement
+                        Navigator.pushReplacement(
+                          // ← pushReplacement
                           context,
                           MaterialPageRoute(
                             builder: (context) => const login(),

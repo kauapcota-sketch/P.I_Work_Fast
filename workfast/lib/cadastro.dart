@@ -29,7 +29,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  
+
   bool _obscureText = true;
   String? _errorMessage;
 
@@ -76,7 +76,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => login(
+          builder: (context) => TelaLogin(
             initialUsername: username,
             initialPassword: password,
           ),
@@ -122,7 +122,8 @@ class _TelaCadastroState extends State<TelaCadastro> {
                     width: 200,
                     height: 200,
                     decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 0, 0, 0).withOpacity(0.12),
+                      color:
+                          const Color.fromARGB(255, 0, 0, 0).withOpacity(0.12),
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: Padding(
@@ -130,9 +131,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
                       child: Image.asset('assets/logo2.png'),
                     ),
                   ),
-
                   const SizedBox(height: 30),
-
                   const Text(
                     'Criar Conta',
                     style: TextStyle(
@@ -141,9 +140,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-
                   const SizedBox(height: 8),
-
                   const Text(
                     'Cadastre-se para continuar',
                     style: TextStyle(
@@ -151,9 +148,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
                       fontSize: 16,
                     ),
                   ),
-
                   const SizedBox(height: 40),
-
                   Container(
                     padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
@@ -174,7 +169,8 @@ class _TelaCadastroState extends State<TelaCadastro> {
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.error_outline, color: Colors.red.shade600, size: 20),
+                                Icon(Icons.error_outline,
+                                    color: Colors.red.shade600, size: 20),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
@@ -229,11 +225,9 @@ class _TelaCadastroState extends State<TelaCadastro> {
                             labelText: 'Senha',
                             prefixIcon: const Icon(Icons.lock_outline),
                             suffixIcon: IconButton(
-                              icon: Icon(
-                                _obscureText 
-                                  ? Icons.visibility_off_outlined 
-                                  : Icons.visibility_outlined
-                              ),
+                              icon: Icon(_obscureText
+                                  ? Icons.visibility_off_outlined
+                                  : Icons.visibility_outlined),
                               onPressed: () {
                                 setState(() {
                                   _obscureText = !_obscureText;
@@ -276,9 +270,7 @@ class _TelaCadastroState extends State<TelaCadastro> {
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 25),
-
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
