@@ -70,7 +70,7 @@ class TelaChamado extends StatelessWidget {
                 Row(
                   children: [
                     CircleAvatar(
-                      radius: 24,
+                     radius: 24,
                       backgroundColor: Colors.blueAccent,
                       child: const Text(
                         'P',

@@ -58,13 +58,93 @@ class TelaLista extends StatelessWidget {
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    _chip('manutenção'),
-                    _chip('pedreiro'),
-                    _chip('eletricista'),
-                    _chip('programação'),
+                    TextButton(
+                     onPressed: () {
+                       
+                     },
+                     style: TextButton.styleFrom(
+                       padding: EdgeInsets.zero,
+                     ),
+                     child: Container(
+                       margin: const EdgeInsets.only(right: 10),
+                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                       decoration: BoxDecoration(
+                         color: Colors.white10,
+                         borderRadius: BorderRadius.circular(20),
+                       ),
+                       child: Text(
+                         "Geral",
+                         style: const TextStyle(color: Colors.white),
+                       ),
+                     ),
+                    ),
+
+                    TextButton(
+                     onPressed: () {
+                       
+                     },
+                     style: TextButton.styleFrom(
+                       padding: EdgeInsets.zero, 
+                     ),
+                     child: Container(
+                       margin: const EdgeInsets.only(right: 10),
+                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                       decoration: BoxDecoration(
+                         color: Colors.white10,
+                         borderRadius: BorderRadius.circular(20),
+                       ),
+                       child: Text(
+                         "Informática",
+                         style: const TextStyle(color: Colors.white),
+                       ),
+                     ),
+                    ),
+
+                    TextButton(
+                     onPressed: () {
+                       
+                     },
+                     style: TextButton.styleFrom(
+                       padding: EdgeInsets.zero, 
+                     ),
+                     child: Container(
+                       margin: const EdgeInsets.only(right: 10),
+                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                       decoration: BoxDecoration(
+                         color: Colors.white10,
+                         borderRadius: BorderRadius.circular(20),
+                       ),
+                       child: Text(
+                         "Elétrica",
+                         style: const TextStyle(color: Colors.white),
+                       ),
+                     ),
+                    ),
+                    TextButton(
+                     onPressed: () {
+                       
+                     },
+                     style: TextButton.styleFrom(
+                       padding: EdgeInsets.zero, 
+                     ),
+                     child: Container(
+                       margin: const EdgeInsets.only(right: 10),
+                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                       decoration: BoxDecoration(
+                         color: Colors.white10,
+                         borderRadius: BorderRadius.circular(20),
+                       ),
+                       child: Text(
+                         "Estrutural",
+                         style: const TextStyle(color: Colors.white),
+                       ),
+                     ),
+                    ),
                   ],
                 ),
               ),
+
+              
 
               const SizedBox(height: 20),
 
@@ -138,20 +218,7 @@ class TelaLista extends StatelessWidget {
     );
   }
 
-  Widget _chip(String text) {
-    return Container(
-      margin: const EdgeInsets.only(right: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white10,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(color: Colors.white),
-      ),
-    );
-  }
+  
 }
 
 // NOVA TELA DE PERFIL
