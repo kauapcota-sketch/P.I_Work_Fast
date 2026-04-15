@@ -3,6 +3,7 @@ import 'package:workfast/buscar_trabalho.dart';
 import 'package:workfast/estrutural_trabalho.dart';
 import 'package:workfast/informatica_trabalho.dart';
 import 'package:workfast/perfil.dart';
+import 'package:workfast/registrar_problema_page.dart'; // ✅ IMPORT ADICIONADO
 
 void main() {
   runApp(const EletricaTrabalho());
@@ -62,101 +63,102 @@ class TelaLista extends StatelessWidget {
                 child: Row(
                   children: [
                     TextButton(
-                     onPressed: () {
-                       Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => busctrabalho()),
-                      ); 
-                     },
-                     style: TextButton.styleFrom(
-                       padding: EdgeInsets.zero,
-                     ),
-                     child: Container(
-                       margin: const EdgeInsets.only(right: 10),
-                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                       decoration: BoxDecoration(
-                         color: Colors.white10,
-                         borderRadius: BorderRadius.circular(20),
-                       ),
-                       child: Text(
-                         "Geral",
-                         style: const TextStyle(color: Colors.white),
-                       ),
-                     ),
-                    ),
-
-                    TextButton(
-                     onPressed: () {
+                      onPressed: () {
                         Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => InformaticaTrabalho()),
-                      );
-                     },
-                     style: TextButton.styleFrom(
-                       padding: EdgeInsets.zero, 
-                     ),
-                     child: Container(
-                       margin: const EdgeInsets.only(right: 10),
-                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                       decoration: BoxDecoration(
-                         color: Colors.white10,
-                         borderRadius: BorderRadius.circular(20),
-                       ),
-                       child: Text(
-                         "Informatica",
-                         style: const TextStyle(color: Colors.white),
-                       ),
-                     ),
-                    ),
-
-                    TextButton(
-                     onPressed: () {
-                       
-                     },
-                     style: TextButton.styleFrom(
-                       padding: EdgeInsets.zero, 
-                     ),
-                     child: Container(
-                       margin: const EdgeInsets.only(right: 10),
-                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                       decoration: BoxDecoration(
-                         color: const Color.fromARGB(0, 255, 255, 255),
-                         borderRadius: BorderRadius.circular(20),
-                       ),
-                       child: Text(
-                         "Elétrica",
-                         style: const TextStyle(color: Colors.white),
-                       ),
-                     ),
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => busctrabalho()),
+                        );
+                      },
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                      ),
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 10),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white10,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          "Geral",
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ),
                     ),
                     TextButton(
-                     onPressed: () {
+                      onPressed: () {
                         Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => EstruturalTrabalho()),
-                      );
-                     },
-                     style: TextButton.styleFrom(
-                       padding: EdgeInsets.zero, 
-                     ),
-                     child: Container(
-                       margin: const EdgeInsets.only(right: 10),
-                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                       decoration: BoxDecoration(
-                         color:  Colors.white10,
-                         borderRadius: BorderRadius.circular(20),
-                       ),
-                       child: Text(
-                         "Estrutural",
-                         style: const TextStyle(color: Colors.white),
-                       ),
-                     ),
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => InformaticaTrabalho()),
+                        );
+                      },
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                      ),
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 10),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white10,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          "Informatica",
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {},
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                      ),
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 10),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(0, 255, 255, 255),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          "Elétrica",
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => EstruturalTrabalho()),
+                        );
+                      },
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                      ),
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 10),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white10,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          "Estrutural",
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
-
-              
 
               const SizedBox(height: 20),
 
@@ -174,14 +176,16 @@ class TelaLista extends StatelessWidget {
                     SizedBox(height: 15),
                     CardChamado(
                       nome: 'Patrícia Gomes',
-                      descricao: 'Preciso instalar novas tomadas em alguns cômodos.',
+                      descricao:
+                          'Preciso instalar novas tomadas em alguns cômodos.',
                       telefone: '31 7690-6743',
                       email: 'Patricia@gmail.com.br',
                     ),
                     SizedBox(height: 15),
                     CardChamado(
                       nome: 'Ricardo Fernandes',
-                      descricao: 'O disjuntor está desarmando toda hora e não sei o motivo.',
+                      descricao:
+                          'O disjuntor está desarmando toda hora e não sei o motivo.',
                       telefone: '31 4372-7636',
                       email: 'Ricardo@gmail.com.br',
                     ),
@@ -195,7 +199,8 @@ class TelaLista extends StatelessWidget {
                     SizedBox(height: 15),
                     CardChamado(
                       nome: 'Eduardo Batista',
-                      descricao: 'Preciso fazer a fiação elétrica completa de uma casa nova.',
+                      descricao:
+                          'Preciso fazer a fiação elétrica completa de uma casa nova.',
                       telefone: '31 8764-6235',
                       email: 'Eduardo@gmail.com.br',
                     ),
@@ -205,22 +210,33 @@ class TelaLista extends StatelessWidget {
 
               const SizedBox(height: 10),
 
-              // 📸 BOTÃO INFERIOR
-              Container(
-                height: 60,
-                decoration: BoxDecoration(
-                  color: Colors.blueAccent,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.blueAccent.withOpacity(0.4),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    )
-                  ],
-                ),
-                child: const Center(
-                  child: Icon(Icons.camera_alt, size: 28, color: Colors.white),
+              // 📸 BOTÃO INFERIOR ✅ LINKADO PARA REGISTRA PROBLEMA
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const registraProblema(),
+                    ),
+                  );
+                },
+                child: Container(
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.blueAccent,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blueAccent.withOpacity(0.4),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      )
+                    ],
+                  ),
+                  child: const Center(
+                    child:
+                        Icon(Icons.camera_alt, size: 28, color: Colors.white),
+                  ),
                 ),
               )
             ],
@@ -229,8 +245,6 @@ class TelaLista extends StatelessWidget {
       ),
     );
   }
-
-  
 }
 
 // NOVA TELA DE PERFIL
@@ -251,7 +265,8 @@ class PerfilScreen extends StatelessWidget {
                 children: [
                   IconButton(
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                    icon: const Icon(Icons.arrow_back,
+                        color: Colors.white, size: 28),
                   ),
                   const SizedBox(width: 10),
                   const Text(
@@ -314,7 +329,7 @@ class PerfilScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      
+
                       _infoRow(Icons.phone, '31 99999-9999'),
                       _infoRow(Icons.email, 'joao.silva@email.com'),
                       _infoRow(Icons.location_on, 'Belo Horizonte, MG'),
@@ -333,7 +348,8 @@ class PerfilScreen extends StatelessWidget {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.blueAccent,
                                 foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -349,7 +365,8 @@ class PerfilScreen extends StatelessWidget {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.redAccent,
                                 foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
