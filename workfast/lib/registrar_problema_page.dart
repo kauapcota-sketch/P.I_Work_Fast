@@ -114,7 +114,6 @@ ${imagemSelecionada != null ? '\n*Foto do problema anexada*' : ''}
           throw Exception('Forma de contato inválida');
       }
 
-      // Remove canLaunchUrl - o try/catch cuida dos erros
       if (mounted) {
         await launchUrl(
           uri,
@@ -169,6 +168,12 @@ ${imagemSelecionada != null ? '\n*Foto do problema anexada*' : ''}
         backgroundColor: const Color(0xFF5B9BD5),
         elevation: 0,
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
