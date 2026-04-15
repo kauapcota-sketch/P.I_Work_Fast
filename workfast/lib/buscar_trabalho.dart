@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:workfast/perfil.dart';
 import 'package:workfast/registrar_problema_page.dart';
 import 'package:workfast/chamado_model.dart';
-import 'package:workfast/detalhes_chamado_page.dart'; // Importa a nova tela de detalhes
+import 'package:workfast/detalhes_chamado_page.dart';
+import 'package:workfast/configuracoes_page.dart'; // Importa a tela de configurações
 
 void main() {
   runApp(const busctrabalho());
@@ -60,10 +61,18 @@ class _TelaListaState extends State<TelaLista> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  // BOTÃO DE CONFIGURAÇÕES FUNCIONAL
                   IconButton(
                     icon: const Icon(Icons.settings,
                         color: Colors.white, size: 28),
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ConfiguracoesPage(),
+                        ),
+                      );
+                    },
                   ),
                   GestureDetector(
                     onTap: () {
@@ -122,21 +131,24 @@ class _TelaListaState extends State<TelaLista> {
                           final chamado = _chamadosExibidos[index];
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 15),
-                            child: CardChamado(
-                                chamado: chamado), // Passa o objeto completo
+                            child: CardChamado(chamado: chamado),
                           );
                         },
                       ),
               ),
               const SizedBox(height: 20),
               GestureDetector(
-                onTap: () {
-                  Navigator.push(
+                onTap: () async {
+                  final result = await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => const registraProblema(),
                     ),
                   );
+
+                  if (result == true) {
+                    _filtrarChamados();
+                  }
                 },
                 child: Container(
                   height: 70,
@@ -227,7 +239,6 @@ class CardChamado extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        // NAVEGAÇÃO PARA A TELA DE DETALHES
         Navigator.push(
           context,
           MaterialPageRoute(
