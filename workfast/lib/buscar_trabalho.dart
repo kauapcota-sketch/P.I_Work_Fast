@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:workfast/perfil.dart';
 import 'package:workfast/registrar_problema_page.dart';
-import 'package:workfast/chamado_model.dart'; // Mudei de "chamado_model.dart" (com espaço) para "chamado_model.dart" (com underline)
+import 'package:workfast/chamado_model.dart';
+import 'package:workfast/detalhes_chamado_page.dart'; // Importa a nova tela de detalhes
 
 void main() {
   runApp(const busctrabalho());
@@ -50,22 +51,19 @@ class _TelaListaState extends State<TelaLista> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF2C3E50), // Fundo escuro para contraste
+      backgroundColor: const Color(0xFF2C3E50),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              // 🔝 TOPO - Configurações e Avatar
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
                     icon: const Icon(Icons.settings,
                         color: Colors.white, size: 28),
-                    onPressed: () {
-                      // Ação para configurações
-                    },
+                    onPressed: () {},
                   ),
                   GestureDetector(
                     onTap: () {
@@ -78,16 +76,13 @@ class _TelaListaState extends State<TelaLista> {
                     },
                     child: const CircleAvatar(
                       radius: 24,
-                      backgroundImage: NetworkImage(
-                          'https://i.pravatar.cc/100?img=3'), // Imagem de avatar dinâmica
+                      backgroundImage:
+                          NetworkImage('https://i.pravatar.cc/100?img=3'),
                     ),
                   ),
                 ],
               ),
-
               const SizedBox(height: 20),
-
-              // Título da Página
               const Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -100,8 +95,6 @@ class _TelaListaState extends State<TelaLista> {
                 ),
               ),
               const SizedBox(height: 20),
-
-              // 🏷️ CATEGORIAS - Botões clicáveis
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -114,10 +107,7 @@ class _TelaListaState extends State<TelaLista> {
                   ],
                 ),
               ),
-
               const SizedBox(height: 20),
-
-              // 📋 LISTA DE CHAMADOS
               Expanded(
                 child: _chamadosExibidos.isEmpty
                     ? const Center(
@@ -133,19 +123,12 @@ class _TelaListaState extends State<TelaLista> {
                           return Padding(
                             padding: const EdgeInsets.only(bottom: 15),
                             child: CardChamado(
-                              nome: chamado.nome,
-                              descricao: chamado.descricao,
-                              telefone: chamado.telefone,
-                              email: chamado.email,
-                            ),
+                                chamado: chamado), // Passa o objeto completo
                           );
                         },
                       ),
               ),
-
               const SizedBox(height: 20),
-
-              // 📸 BOTÃO INFERIOR - REGISTRAR PROBLEMA
               GestureDetector(
                 onTap: () {
                   Navigator.push(
@@ -160,10 +143,7 @@ class _TelaListaState extends State<TelaLista> {
                   width: double.infinity,
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFF4CAF50),
-                        Color(0xFF8BC34A)
-                      ], // Gradiente de verde
+                      colors: [Color(0xFF4CAF50), Color(0xFF8BC34A)],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -238,121 +218,85 @@ class _TelaListaState extends State<TelaLista> {
   }
 }
 
-// 🧩 CARD MODERNO
 class CardChamado extends StatelessWidget {
-  final String nome;
-  final String descricao;
-  final String telefone;
-  final String email;
+  final Chamado chamado;
 
-  const CardChamado({
-    super.key,
-    required this.nome,
-    required this.descricao,
-    required this.telefone,
-    required this.email,
-  });
+  const CardChamado({super.key, required this.chamado});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 10,
-            offset: const Offset(0, 6),
-          )
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 👤 NOME
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 18,
-                backgroundColor: const Color(0xFF4CAF50),
-                child: Text(
-                  nome[0].toUpperCase(),
-                  style: const TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.bold),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      nome,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
-                    Text(
-                      'Chamado #${DateTime.now().millisecondsSinceEpoch.toString().substring(8, 11)}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            ],
+    return GestureDetector(
+      onTap: () {
+        // NAVEGAÇÃO PARA A TELA DE DETALHES
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DetalhesChamadoPage(chamado: chamado),
           ),
-
-          const SizedBox(height: 14),
-
-          // 📞 CONTATO
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade50,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade200),
-            ),
-            child: Row(
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 10,
+              offset: const Offset(0, 6),
+            )
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
               children: [
-                const Icon(Icons.call, color: Color(0xFF4CAF50), size: 20),
-                const SizedBox(width: 8),
+                CircleAvatar(
+                  radius: 18,
+                  backgroundColor: const Color(0xFF4CAF50),
+                  child: Text(
+                    chamado.nome[0].toUpperCase(),
+                    style: const TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(telefone,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black87)),
-                      Text(email,
-                          style: TextStyle(
-                              fontSize: 12, color: Colors.grey.shade600)),
+                      Text(
+                        chamado.nome,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      Text(
+                        'Clique para ver detalhes',
+                        style: TextStyle(
+                            fontSize: 12, color: Colors.grey.shade600),
+                      ),
                     ],
                   ),
                 ),
+                const Icon(Icons.arrow_forward_ios,
+                    size: 14, color: Colors.grey),
               ],
             ),
-          ),
-
-          const SizedBox(height: 12),
-
-          // 📝 DESCRIÇÃO
-          Text(
-            descricao,
-            style: TextStyle(
-              fontSize: 14,
-              height: 1.4,
-              color: Colors.grey.shade700,
+            const SizedBox(height: 14),
+            Text(
+              chamado.descricao,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                  fontSize: 14, height: 1.4, color: Colors.grey.shade700),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -21,9 +21,8 @@ class Chamado {
   });
 }
 
-// ESTA CLASSE ESTAVA FALTANDO NO SEU ARQUIVO:
 class ChamadoService {
-  static final List<Chamado> _todosChamados = [
+  static List<Chamado> _todosChamados = [
     Chamado(
       nome: 'Paulo Henrique',
       descricao: 'Meu computador desligou de repente e agora nao liga mais.',
