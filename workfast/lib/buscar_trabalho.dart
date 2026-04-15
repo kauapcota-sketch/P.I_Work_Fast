@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:workfast/Eletrica_trabalho.dart';
-import 'package:workfast/estrutural_trabalho.dart';
-import 'package:workfast/informatica_trabalho.dart';
 import 'package:workfast/perfil.dart';
-import 'package:workfast/registrar_problema_page.dart'; // ✅ IMPORT ADICIONADO
+import 'package:workfast/registrar_problema_page.dart';
+import 'package:workfast/chamado_model.dart'; // Mudei de "chamado_model.dart" (com espaço) para "chamado_model.dart" (com underline)
 
 void main() {
   runApp(const busctrabalho());
@@ -14,30 +12,61 @@ class busctrabalho extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: TelaLista(),
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+      home: const TelaLista(),
     );
   }
 }
 
-class TelaLista extends StatelessWidget {
+class TelaLista extends StatefulWidget {
   const TelaLista({super.key});
+
+  @override
+  State<TelaLista> createState() => _TelaListaState();
+}
+
+class _TelaListaState extends State<TelaLista> {
+  CategoriaChamado _categoriaSelecionada = CategoriaChamado.geral;
+  List<Chamado> _chamadosExibidos = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _filtrarChamados();
+  }
+
+  void _filtrarChamados() {
+    setState(() {
+      _chamadosExibidos =
+          ChamadoService.getChamadosPorCategoria(_categoriaSelecionada);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF2C3E50),
+      backgroundColor: const Color(0xFF2C3E50), // Fundo escuro para contraste
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              // 🔝 TOPO
+              // 🔝 TOPO - Configurações e Avatar
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Icon(Icons.settings, color: Colors.white),
+                  IconButton(
+                    icon: const Icon(Icons.settings,
+                        color: Colors.white, size: 28),
+                    onPressed: () {
+                      // Ação para configurações
+                    },
+                  ),
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
@@ -48,8 +77,9 @@ class TelaLista extends StatelessWidget {
                       );
                     },
                     child: const CircleAvatar(
-                      backgroundImage:
-                          NetworkImage('https://i.pravatar.cc/100'),
+                      radius: 24,
+                      backgroundImage: NetworkImage(
+                          'https://i.pravatar.cc/100?img=3'), // Imagem de avatar dinâmica
                     ),
                   ),
                 ],
@@ -57,33 +87,30 @@ class TelaLista extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // 🏷️ CATEGORIAS
+              // Título da Página
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Chamados Recentes',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // 🏷️ CATEGORIAS - Botões clicáveis
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
-                    _categoriaButton('Geral', Colors.grey, () {}),
-                    _categoriaButton('Informática', Colors.blue, () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => InformaticaTrabalho()),
-                      );
-                    }),
-                    _categoriaButton('Elétrica', Colors.orange, () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => EletricaTrabalho()),
-                      );
-                    }),
-                    _categoriaButton('Estrutural', Colors.green, () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => EstruturalTrabalho()),
-                      );
-                    }),
+                    _categoriaButton('Geral', CategoriaChamado.geral),
+                    _categoriaButton(
+                        'Informática', CategoriaChamado.informatica),
+                    _categoriaButton('Elétrica', CategoriaChamado.eletrica),
+                    _categoriaButton('Estrutural', CategoriaChamado.estrutural),
                   ],
                 ),
               ),
@@ -92,74 +119,58 @@ class TelaLista extends StatelessWidget {
 
               // 📋 LISTA DE CHAMADOS
               Expanded(
-                child: ListView(
-                  children: const [
-                    CardChamado(
-                      nome: 'Paulo Henrique',
-                      descricao:
-                          'Meu computador desligou de repente e agora nao liga mais.',
-                      telefone: '31 5983-1047',
-                      email: 'paulo@gmail.com.br',
-                    ),
-                    SizedBox(height: 15),
-                    CardChamado(
-                      nome: 'Lucas de Oliveira',
-                      descricao: 'Preciso de um analista urgente.',
-                      telefone: '31 6589-5632',
-                      email: 'lucas@gmail.com.br',
-                    ),
-                    SizedBox(height: 15),
-                    CardChamado(
-                      nome: 'Italo Freitas',
-                      descricao: 'Preciso trocar a cor da minha casa.',
-                      telefone: '31 7690-6743',
-                      email: 'Italo@gmail.com.br',
-                    ),
-                    SizedBox(height: 15),
-                    CardChamado(
-                      nome: 'Mariana Borges',
-                      descricao:
-                          'Preciso de um desenvolvedor para montar um site.',
-                      telefone: '31 8701-7853',
-                      email: 'Mariana@gmail.com.br',
-                    ),
-                    SizedBox(height: 15),
-                    CardChamado(
-                      nome: 'Rayanne Silva',
-                      descricao: 'Meu micro-ondas quebrou.',
-                      telefone: '31 9612-3370',
-                      email: 'rayanne@gmail.com.br',
-                    ),
-                  ],
-                ),
+                child: _chamadosExibidos.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'Nenhum chamado nesta categoria.',
+                          style: TextStyle(color: Colors.white70, fontSize: 16),
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: _chamadosExibidos.length,
+                        itemBuilder: (context, index) {
+                          final chamado = _chamadosExibidos[index];
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 15),
+                            child: CardChamado(
+                              nome: chamado.nome,
+                              descricao: chamado.descricao,
+                              telefone: chamado.telefone,
+                              email: chamado.email,
+                            ),
+                          );
+                        },
+                      ),
               ),
 
-              const SizedBox(height: 20), // ✅ MAIS ESPAÇO
+              const SizedBox(height: 20),
 
-              // 📸 BOTÃO INFERIOR - REGISTRA PROBLEMA ✅
+              // 📸 BOTÃO INFERIOR - REGISTRAR PROBLEMA
               GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          const registraProblema(), // ✅ LINKADO
+                      builder: (context) => const registraProblema(),
                     ),
                   );
                 },
                 child: Container(
-                  height: 70, // ✅ MAIOR E MAIS TOCÁVEL
+                  height: 70,
                   width: double.infinity,
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Colors.blueAccent, Colors.blue],
+                      colors: [
+                        Color(0xFF4CAF50),
+                        Color(0xFF8BC34A)
+                      ], // Gradiente de verde
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.blueAccent.withOpacity(0.5),
+                        color: const Color(0xFF4CAF50).withOpacity(0.5),
                         blurRadius: 15,
                         offset: const Offset(0, 8),
                       )
@@ -168,7 +179,8 @@ class TelaLista extends StatelessWidget {
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.camera_alt, size: 28, color: Colors.white),
+                      Icon(Icons.add_circle_outline,
+                          size: 28, color: Colors.white),
                       SizedBox(width: 12),
                       Text(
                         'REGISTRAR PROBLEMA',
@@ -189,24 +201,36 @@ class TelaLista extends StatelessWidget {
     );
   }
 
-  // 🔧 WIDGET REUTILIZÁVEL PARA CATEGORIAS
-  Widget _categoriaButton(String texto, Color cor, VoidCallback onTap) {
+  Widget _categoriaButton(String texto, CategoriaChamado categoria) {
+    final isSelected = _categoriaSelecionada == categoria;
     return GestureDetector(
-      onTap: onTap,
+      onTap: () {
+        setState(() {
+          _categoriaSelecionada = categoria;
+          _filtrarChamados();
+        });
+      },
       child: Container(
         margin: const EdgeInsets.only(right: 12),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
         decoration: BoxDecoration(
-          color: cor.withOpacity(0.2),
+          color: isSelected
+              ? const Color(0xFF4CAF50)
+              : Colors.grey.withOpacity(0.2),
           borderRadius: BorderRadius.circular(25),
-          border: Border.all(color: cor.withOpacity(0.3), width: 1),
+          border: Border.all(
+            color: isSelected
+                ? const Color(0xFF4CAF50)
+                : Colors.grey.withOpacity(0.3),
+            width: 1,
+          ),
         ),
         child: Text(
           texto,
           style: TextStyle(
-            color: Colors.white,
+            color: isSelected ? Colors.white : Colors.white70,
             fontWeight: FontWeight.w600,
-            fontSize: 14,
+            fontSize: 15,
           ),
         ),
       ),
@@ -214,7 +238,7 @@ class TelaLista extends StatelessWidget {
   }
 }
 
-// 🧩 CARD MODERNO (mantido igual)
+// 🧩 CARD MODERNO
 class CardChamado extends StatelessWidget {
   final String nome;
   final String descricao;
@@ -252,7 +276,7 @@ class CardChamado extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 18,
-                backgroundColor: Colors.blueAccent,
+                backgroundColor: const Color(0xFF4CAF50),
                 child: Text(
                   nome[0].toUpperCase(),
                   style: const TextStyle(
@@ -269,6 +293,7 @@ class CardChamado extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
+                        color: Colors.black87,
                       ),
                     ),
                     Text(
@@ -296,16 +321,19 @@ class CardChamado extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(Icons.call, color: Colors.green, size: 20),
+                const Icon(Icons.call, color: Color(0xFF4CAF50), size: 20),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(telefone,
-                          style: const TextStyle(fontWeight: FontWeight.w600)),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87)),
                       Text(email,
-                          style: TextStyle(fontSize: 12, color: Colors.grey)),
+                          style: TextStyle(
+                              fontSize: 12, color: Colors.grey.shade600)),
                     ],
                   ),
                 ),
