@@ -8,7 +8,6 @@ class DetalhesChamadoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Define a cor baseada na categoria para um visual dinâmico
     Color categoriaColor;
     IconData categoriaIcon;
 
@@ -49,7 +48,6 @@ class DetalhesChamadoPage extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // Card Principal
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -64,12 +62,13 @@ class DetalhesChamadoPage extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  // Cabeçalho do Card com Foto e Nome
+                  // Cabeçalho
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       color: categoriaColor.withOpacity(0.1),
-                      borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+                      borderRadius:
+                          const BorderRadius.vertical(top: Radius.circular(30)),
                     ),
                     child: Row(
                       children: [
@@ -100,7 +99,8 @@ class DetalhesChamadoPage extends StatelessWidget {
                               ),
                               const SizedBox(height: 5),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 4),
                                 decoration: BoxDecoration(
                                   color: categoriaColor,
                                   borderRadius: BorderRadius.circular(20),
@@ -108,7 +108,8 @@ class DetalhesChamadoPage extends StatelessWidget {
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(categoriaIcon, size: 14, color: Colors.white),
+                                    Icon(categoriaIcon,
+                                        size: 14, color: Colors.white),
                                     const SizedBox(width: 5),
                                     Text(
                                       chamado.categoria.name.toUpperCase(),
@@ -128,12 +129,36 @@ class DetalhesChamadoPage extends StatelessWidget {
                     ),
                   ),
 
-                  // Conteúdo do Card
+                  // Conteúdo
                   Padding(
                     padding: const EdgeInsets.all(24),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // ── Foto do problema (exibe só se existir) ──
+                        if (chamado.imagem != null) ...[
+                          const Text(
+                            'Foto do Problema',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF2C3E50),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: Image.file(
+                              chamado.imagem!,
+                              width: double.infinity,
+                              height: 200,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          const SizedBox(height: 30),
+                        ],
+
+                        // ── Descrição ───────────────────────────────
                         const Text(
                           'Descrição do Problema',
                           style: TextStyle(
@@ -152,8 +177,8 @@ class DetalhesChamadoPage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 30),
-                        
-                        // Seção de Contato
+
+                        // ── Contato ────────────────────────────────
                         const Text(
                           'Informações de Contato',
                           style: TextStyle(
@@ -163,27 +188,31 @@ class DetalhesChamadoPage extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 15),
-                        _buildContactItem(Icons.phone, chamado.telefone, Colors.green),
+                        _buildContactItem(
+                            Icons.phone, chamado.telefone, Colors.green),
                         const SizedBox(height: 10),
-                        _buildContactItem(Icons.email, chamado.email, Colors.indigo),
-                        
+                        _buildContactItem(
+                            Icons.email, chamado.email, Colors.indigo),
+
                         const SizedBox(height: 40),
 
-                        // Botões de Ação
+                        // ── Botão aceitar ──────────────────────────
                         Row(
                           children: [
                             Expanded(
                               child: ElevatedButton(
                                 onPressed: () {
-                                  // Lógica para aceitar
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Você aceitou este chamado!')),
+                                    const SnackBar(
+                                        content:
+                                            Text('Você aceitou este chamado!')),
                                   );
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF4CAF50),
                                   foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 15),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 15),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(15),
                                   ),
@@ -191,7 +220,9 @@ class DetalhesChamadoPage extends StatelessWidget {
                                 ),
                                 child: const Text(
                                   'ACEITAR SERVIÇO',
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16),
                                 ),
                               ),
                             ),
@@ -203,7 +234,9 @@ class DetalhesChamadoPage extends StatelessWidget {
                             onPressed: () => Navigator.pop(context),
                             child: Text(
                               'Voltar para a lista',
-                              style: TextStyle(color: Colors.grey.shade600, fontWeight: FontWeight.w600),
+                              style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w600),
                             ),
                           ),
                         ),
