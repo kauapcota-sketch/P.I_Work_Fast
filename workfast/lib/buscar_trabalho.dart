@@ -4,8 +4,14 @@ import 'package:workfast/registrar_problema_page.dart';
 import 'package:workfast/chamado_model.dart';
 import 'package:workfast/detalhes_chamado_page.dart';
 import 'package:workfast/configuracoes_page.dart'; // Importa a tela de configurações
+import 'dart:io';
+import 'package:hive_flutter/hive_flutter.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  await Hive.openBox('perfil');
+
   runApp(const busctrabalho());
 }
 
@@ -36,11 +42,29 @@ class _TelaListaState extends State<TelaLista> {
   CategoriaChamado _categoriaSelecionada = CategoriaChamado.geral;
   List<Chamado> _chamadosExibidos = [];
 
+  File? imagem;
+
   @override
-  void initState() {
-    super.initState();
-    _filtrarChamados();
+void initState() {
+  super.initState();
+  _filtrarChamados();
+  carregarImagem();
+}
+Future<void> carregarImagem() async {
+  var box = Hive.box('perfil');
+
+  String? caminhoImagem = box.get('imagem');
+
+  if (caminhoImagem != null) {
+    final file = File(caminhoImagem);
+    if (await file.exists()) {
+      setState(() {
+        imagem = file;
+      });
+    }
   }
+}
+
 
   void _filtrarChamados() {
     setState(() {
@@ -75,19 +99,25 @@ class _TelaListaState extends State<TelaLista> {
                     },
                   ),
                   GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const PerfilPage(),
-                        ),
-                      );
-                    },
-                    child: const CircleAvatar(
-                      radius: 24,
-                      backgroundImage:
-                          NetworkImage('https://i.pravatar.cc/100?img=3'),
-                    ),
+                    onTap: () async {
+                     await Navigator.push(
+                       context,
+                       MaterialPageRoute(
+                         builder: (context) => const PerfilPage(),
+                       ),
+                     );
+                   
+                     carregarImagem(); // 🔄 atualiza foto ao voltar
+                   },
+                    child: CircleAvatar(
+                     radius: 24,
+                     backgroundColor: Colors.blueAccent,
+                     backgroundImage:
+                         imagem != null ? FileImage(imagem!) : null,
+                     child: imagem == null
+                         ? const Icon(Icons.person, color: Colors.white)
+                         : null,
+                   ),
                   ),
                 ],
               ),
