@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:workfast/buscar_trabalho.dart';
 import 'package:workfast/chamado_model.dart';
 import 'package:workfast/main.dart'; // Importa o CardChamado
 
