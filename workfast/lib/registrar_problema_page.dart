@@ -155,7 +155,7 @@ class _RegistrarProblemaPageState extends State<RegistrarProblemaPage> {
                 controller: nomeController,
                 textCapitalization: TextCapitalization.words,
                 decoration: InputDecoration(
-                  hintText: 'Ex: João Silva',
+                  hintText: 'Ex: Erick Guilherme',
                   prefixIcon: const Icon(Icons.person_outline),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
