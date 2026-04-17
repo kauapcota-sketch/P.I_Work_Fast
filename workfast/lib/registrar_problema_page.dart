@@ -1,19 +1,13 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:workfast/chamado_model.dart';
-
-// REMOVIDO: 'dart:io', 'image_picker', 'url_launcher'
-// Motivo: o envio não deve abrir apps externos; deve registrar no ChamadoService
-
-// REMOVIDO: void main() e o wrapper MaterialApp
-// Motivo: wrapping com MaterialApp próprio quebrava a navegação (tela preta ao voltar),
-// porque o Navigator.pop perdia o contexto do app principal.
 
 class registraProblema extends StatelessWidget {
   const registraProblema({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Agora é apenas um Scaffold simples, sem MaterialApp
     return const RegistrarProblemaPage();
   }
 }
@@ -26,6 +20,7 @@ class RegistrarProblemaPage extends StatefulWidget {
 }
 
 class _RegistrarProblemaPageState extends State<RegistrarProblemaPage> {
+  File? imagemSelecionada;
   bool isLoading = false;
 
   final nomeController = TextEditingController();
@@ -34,6 +29,8 @@ class _RegistrarProblemaPageState extends State<RegistrarProblemaPage> {
   final emailController = TextEditingController();
 
   String categoriaEscolhida = 'Elétrica';
+
+  final picker = ImagePicker();
 
   final List<Map<String, dynamic>> categorias = [
     {'nome': 'Elétrica', 'emoji': '🟡', 'valor': CategoriaChamado.eletrica},
@@ -46,15 +43,21 @@ class _RegistrarProblemaPageState extends State<RegistrarProblemaPage> {
     {'nome': 'Geral', 'emoji': '❓', 'valor': CategoriaChamado.geral},
   ];
 
-  void mostrarSnack(String texto, {bool erro = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(texto),
-        backgroundColor: erro ? Colors.red[400] : Colors.green[400],
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
-    );
+  Future<void> selecionarImagem(ImageSource source) async {
+    try {
+      final XFile? imagem = await picker.pickImage(
+        source: source,
+        imageQuality: 80,
+      );
+
+      if (imagem != null && mounted) {
+        setState(() {
+          imagemSelecionada = File(imagem.path);
+        });
+      }
+    } catch (e) {
+      mostrarSnack('Erro ao selecionar imagem', erro: true);
+    }
   }
 
   void enviar() {
@@ -72,36 +75,48 @@ class _RegistrarProblemaPageState extends State<RegistrarProblemaPage> {
       return;
     }
     if (telefone.isEmpty) {
-      mostrarSnack('Informe um telefone de contato.', erro: true);
+      mostrarSnack('Informe um telefone.', erro: true);
       return;
     }
     if (email.isEmpty) {
-      mostrarSnack('Informe um email de contato.', erro: true);
+      mostrarSnack('Informe um email.', erro: true);
       return;
     }
 
-    // Encontra o enum da categoria selecionada
     final categoriaSelecionada = categorias.firstWhere(
       (c) => c['nome'] == categoriaEscolhida,
     )['valor'] as CategoriaChamado;
 
-    // Registra o chamado diretamente no ChamadoService
     final novoChamado = Chamado(
       nome: nome,
       descricao: descricao,
       telefone: telefone,
       email: email,
       categoria: categoriaSelecionada,
+      // Se seu model aceitar imagem, adiciona aqui:
+      // imagemPath: imagemSelecionada?.path,
     );
 
     ChamadoService.adicionarChamado(novoChamado);
 
     mostrarSnack('Problema registrado com sucesso!');
 
-    // Volta para a tela anterior e avisa que houve novo chamado
     Future.delayed(const Duration(milliseconds: 800), () {
       if (mounted) Navigator.pop(context, true);
     });
+  }
+
+  void mostrarSnack(String texto, {bool erro = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(texto),
+        backgroundColor: erro ? Colors.red[400] : Colors.green[400],
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
   }
 
   @override
@@ -145,165 +160,97 @@ class _RegistrarProblemaPageState extends State<RegistrarProblemaPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Nome
-              const Text(
-                'Seu nome',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: nomeController,
-                textCapitalization: TextCapitalization.words,
-                decoration: InputDecoration(
-                  hintText: 'Ex: João Silva',
-                  prefixIcon: const Icon(Icons.person_outline),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+              // IMAGEM
+              GestureDetector(
+                onTap: () => showModalBottomSheet(
+                  context: context,
+                  builder: (_) => Wrap(
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.camera_alt),
+                        title: const Text('Tirar foto'),
+                        onTap: () {
+                          Navigator.pop(context);
+                          selecionarImagem(ImageSource.camera);
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.photo),
+                        title: const Text('Galeria'),
+                        onTap: () {
+                          Navigator.pop(context);
+                          selecionarImagem(ImageSource.gallery);
+                        },
+                      ),
+                    ],
                   ),
-                  filled: true,
-                  fillColor: Colors.grey[50],
+                ),
+                child: Container(
+                  height: 160,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.blue),
+                  ),
+                  child: imagemSelecionada == null
+                      ? const Center(child: Text('Adicionar foto'))
+                      : Image.file(imagemSelecionada!, fit: BoxFit.cover),
                 ),
               ),
+
               const SizedBox(height: 24),
 
-              // Descrição
-              const Text(
-                'Descrição do problema',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 12),
+              // NOME
+              const Text('Seu nome'),
+              TextField(controller: nomeController),
+
+              const SizedBox(height: 16),
+
+              // DESCRIÇÃO
+              const Text('Descrição'),
               TextField(
                 controller: descricaoController,
                 maxLines: 4,
-                textCapitalization: TextCapitalization.sentences,
-                decoration: InputDecoration(
-                  hintText: 'Descreva detalhadamente o problema...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey[50],
-                ),
               ),
+
+              const SizedBox(height: 16),
+
+              // CATEGORIA
+              DropdownButton<String>(
+                value: categoriaEscolhida,
+                isExpanded: true,
+                items: categorias.map((c) {
+                  return DropdownMenuItem(
+                    value: c['nome'] as String,
+                    child: Text('${c['emoji']} ${c['nome']}'),
+                  );
+                }).toList(),
+                onChanged: (v) {
+                  if (v != null) setState(() => categoriaEscolhida = v);
+                },
+              ),
+
+              const SizedBox(height: 16),
+
+              // TELEFONE
+              const Text('Telefone'),
+              TextField(controller: telefoneController),
+
+              const SizedBox(height: 16),
+
+              // EMAIL
+              const Text('Email'),
+              TextField(controller: emailController),
+
               const SizedBox(height: 24),
 
-              // Categoria
-              const Text(
-                'Categoria',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey[300]!),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    isExpanded: true,
-                    value: categoriaEscolhida,
-                    items: categorias.map((categoria) {
-                      return DropdownMenuItem<String>(
-                        value: categoria['nome'] as String,
-                        child: Row(
-                          children: [
-                            Text(categoria['emoji'] as String),
-                            const SizedBox(width: 8),
-                            Text(categoria['nome'] as String),
-                          ],
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() => categoriaEscolhida = value);
-                      }
-                    },
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Telefone
-              const Text(
-                'Telefone de contato',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: telefoneController,
-                keyboardType: TextInputType.phone,
-                decoration: InputDecoration(
-                  hintText: '(11) 99999-9999',
-                  prefixIcon: const Icon(Icons.phone_outlined),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey[50],
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Email
-              const Text(
-                'Email de contato',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  hintText: 'email@exemplo.com',
-                  prefixIcon: const Icon(Icons.email_outlined),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey[50],
-                ),
-              ),
-              const SizedBox(height: 32),
-
-              // Botão enviar
+              // BOTÃO
               SizedBox(
                 width: double.infinity,
-                height: 56,
+                height: 50,
                 child: ElevatedButton(
                   onPressed: isLoading ? null : enviar,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF4CAF50),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 2,
-                  ),
-                  child: isLoading
-                      ? const SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.check_circle_outline),
-                            SizedBox(width: 10),
-                            Text(
-                              'REGISTRAR PROBLEMA',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
+                  child: const Text('REGISTRAR PROBLEMA'),
                 ),
               ),
             ],
