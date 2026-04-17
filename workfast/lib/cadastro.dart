@@ -1,298 +1,275 @@
 import 'package:flutter/material.dart';
-import 'package:workfast/login.dart';
-import 'user_service.dart';
+import 'package:workfast/auth_service.dart';
 
-void main() {
-  runApp(const Cadastro());
-}
-
-class Cadastro extends StatelessWidget {
-  const Cadastro({super.key});
+class CadastroPage extends StatefulWidget {
+  const CadastroPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: TelaCadastro(),
-    );
-  }
+  State<CadastroPage> createState() => _CadastroPageState();
 }
 
-class TelaCadastro extends StatefulWidget {
-  const TelaCadastro({super.key});
+class _CadastroPageState extends State<CadastroPage> {
+  final _usernameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
 
-  @override
-  State<TelaCadastro> createState() => _TelaCadastroState();
-}
-
-class _TelaCadastroState extends State<TelaCadastro> {
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-
+  bool _isLoading = false;
   bool _obscureText = true;
   String? _errorMessage;
-
-  final UserService _userService = UserService();
-
-  void _handleCadastro() {
-    final username = _usernameController.text.trim();
-    final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
-
-    setState(() {
-      _errorMessage = null;
-    });
-
-    if (username.isEmpty || email.isEmpty || password.isEmpty) {
-      setState(() {
-        _errorMessage = 'Preencha todos os campos';
-      });
-      return;
-    }
-
-    if (username.length < 3) {
-      setState(() {
-        _errorMessage = 'Usuário deve ter pelo menos 3 caracteres';
-      });
-      return;
-    }
-
-    if (!_userService.isValidEmail(email)) {
-      setState(() {
-        _errorMessage = 'Email inválido';
-      });
-      return;
-    }
-
-    if (password.length < 6) {
-      setState(() {
-        _errorMessage = 'Senha deve ter pelo menos 6 caracteres';
-      });
-      return;
-    }
-
-    if (_userService.cadastrarUsuario(username, email, password)) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => TelaLogin(
-            initialUsername: username,
-            initialPassword: password,
-          ),
-        ),
-      );
-    } else {
-      setState(() {
-        _errorMessage = 'Usuário já existe ou dados inválidos';
-      });
-    }
-  }
 
   @override
   void dispose() {
     _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  void _handleCadastro() async {
+    final username = _usernameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+    final confirmPassword = _confirmPasswordController.text.trim();
+
+    setState(() => _errorMessage = null);
+
+    if (username.isEmpty || email.isEmpty || password.isEmpty) {
+      setState(() => _errorMessage = 'Por favor, preencha todos os campos');
+      return;
+    }
+
+    if (password != confirmPassword) {
+      setState(() => _errorMessage = 'As senhas não coincidem');
+      return;
+    }
+
+    if (password.length < 6) {
+      setState(
+          () => _errorMessage = 'A senha deve ter pelo menos 6 caracteres');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    // Pequeno delay para feedback visual
+    await Future.delayed(const Duration(milliseconds: 800));
+
+    // SALVA OS DADOS NO HIVE (Banco de dados local)
+    final sucesso =
+        await AuthService.cadastrarUsuario(username, email, password);
+
+    setState(() => _isLoading = false);
+
+    if (sucesso) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Conta criada com sucesso! Faça login.'),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        Navigator.pushReplacementNamed(context, '/login');
+      }
+    } else {
+      setState(() => _errorMessage = 'Este e-mail já está cadastrado.');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color.fromRGBO(39, 72, 95, 1),
-              Color(0xFF4A7A99),
-            ],
+            colors: isDarkMode
+                ? [const Color(0xFF1B2836), const Color(0xFF0D141A)]
+                : [const Color(0xFF27485F), const Color(0xFF4A7A99)],
           ),
         ),
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 28),
+              padding: const EdgeInsets.symmetric(horizontal: 30),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 200,
-                    height: 200,
-                    decoration: BoxDecoration(
-                      color:
-                          const Color.fromARGB(255, 0, 0, 0).withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(18),
-                      child: Image.asset('assets/logo2.png'),
-                    ),
-                  ),
-                  const SizedBox(height: 30),
-                  const Text(
-                    'Criar Conta',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 34,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Cadastre-se para continuar',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 16,
-                    ),
+                  // LOGO E NOME DA EMPRESA (PADRONIZADO COM LOGIN)
+                  Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                              color: Colors.white.withOpacity(0.2), width: 2),
+                        ),
+                        child: const Icon(
+                          Icons.bolt_rounded,
+                          size: 60,
+                          color: Color(0xFF4CAF50),
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      const Text(
+                        'WorkFast',
+                        style: TextStyle(
+                            fontSize: 36,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: 1.5,
+                            shadows: [
+                              Shadow(
+                                  color: Colors.black26,
+                                  offset: Offset(0, 4),
+                                  blurRadius: 10)
+                            ]),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        'Crie sua conta e comece agora',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white.withOpacity(0.8),
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 40),
+
+                  // CARD DE CADASTRO
                   Container(
-                    padding: const EdgeInsets.all(24),
+                    padding: const EdgeInsets.all(28),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(30),
+                      color:
+                          isDarkMode ? const Color(0xFF2C3E50) : Colors.white,
+                      borderRadius: BorderRadius.circular(35),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.3),
+                          blurRadius: 25,
+                          offset: const Offset(0, 15),
+                        ),
+                      ],
                     ),
                     child: Column(
                       children: [
-                        // Mensagem de erro
+                        Text(
+                          'CADASTRO',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: isDarkMode
+                                ? Colors.white
+                                : const Color(0xFF27485F),
+                          ),
+                        ),
+                        const SizedBox(height: 25),
                         if (_errorMessage != null)
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            margin: const EdgeInsets.only(bottom: 16),
-                            decoration: BoxDecoration(
-                              color: Colors.red.shade50,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.red.shade200),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(Icons.error_outline,
-                                    color: Colors.red.shade600, size: 20),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    _errorMessage!,
-                                    style: TextStyle(
-                                      color: Colors.red.shade700,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 15),
+                            child: Text(
+                              _errorMessage!,
+                              style: const TextStyle(
+                                  color: Colors.redAccent,
+                                  fontWeight: FontWeight.w600),
                             ),
                           ),
-
-                        TextField(
+                        _buildField(
                           controller: _usernameController,
-                          decoration: InputDecoration(
-                            labelText: 'Usuário',
-                            prefixIcon: const Icon(Icons.person_outline),
-                            filled: true,
-                            fillColor: const Color(0xFFF1F4F8),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(18),
-                              borderSide: BorderSide.none,
-                            ),
-                          ),
+                          label: 'Nome de Usuário',
+                          icon: Icons.person_outline,
+                          isDarkMode: isDarkMode,
                         ),
-
-                        const SizedBox(height: 20),
-
-                        TextField(
+                        const SizedBox(height: 15),
+                        _buildField(
                           controller: _emailController,
+                          label: 'E-mail',
+                          icon: Icons.email_outlined,
+                          isDarkMode: isDarkMode,
                           keyboardType: TextInputType.emailAddress,
-                          decoration: InputDecoration(
-                            labelText: 'Gmail',
-                            prefixIcon: const Icon(Icons.email_outlined),
-                            filled: true,
-                            fillColor: const Color(0xFFF1F4F8),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(18),
-                              borderSide: BorderSide.none,
-                            ),
-                          ),
                         ),
-
-                        const SizedBox(height: 20),
-
-                        TextField(
+                        const SizedBox(height: 15),
+                        _buildField(
                           controller: _passwordController,
-                          obscureText: _obscureText,
-                          decoration: InputDecoration(
-                            labelText: 'Senha',
-                            prefixIcon: const Icon(Icons.lock_outline),
-                            suffixIcon: IconButton(
-                              icon: Icon(_obscureText
-                                  ? Icons.visibility_off_outlined
-                                  : Icons.visibility_outlined),
-                              onPressed: () {
-                                setState(() {
-                                  _obscureText = !_obscureText;
-                                });
-                              },
-                            ),
-                            filled: true,
-                            fillColor: const Color(0xFFF1F4F8),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(18),
-                              borderSide: BorderSide.none,
-                            ),
+                          label: 'Senha',
+                          icon: Icons.lock_outline,
+                          isDarkMode: isDarkMode,
+                          obscure: _obscureText,
+                          suffix: IconButton(
+                            icon: Icon(
+                                _obscureText
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                size: 20),
+                            onPressed: () =>
+                                setState(() => _obscureText = !_obscureText),
                           ),
                         ),
-
-                        const SizedBox(height: 28),
-
+                        const SizedBox(height: 15),
+                        _buildField(
+                          controller: _confirmPasswordController,
+                          label: 'Confirmar Senha',
+                          icon: Icons.lock_reset_outlined,
+                          isDarkMode: isDarkMode,
+                          obscure: _obscureText,
+                        ),
+                        const SizedBox(height: 30),
                         SizedBox(
                           width: double.infinity,
-                          height: 58,
+                          height: 60,
                           child: ElevatedButton(
-                            onPressed: _handleCadastro,
+                            onPressed: _isLoading ? null : _handleCadastro,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF27485F),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(18),
-                              ),
+                              backgroundColor: const Color(0xFF4CAF50),
+                              foregroundColor: Colors.white,
                               elevation: 8,
+                              shadowColor:
+                                  const Color(0xFF4CAF50).withOpacity(0.5),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20)),
                             ),
-                            child: const Text(
-                              'CADASTRAR',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
+                            child: _isLoading
+                                ? const CircularProgressIndicator(
+                                    color: Colors.white)
+                                : const Text(
+                                    'CADASTRAR',
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 1),
+                                  ),
                           ),
                         ),
                       ],
                     ),
                   ),
+
                   const SizedBox(height: 25),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text(
-                        'Já tem conta?',
-                        style: TextStyle(color: Colors.white70),
-                      ),
+                      const Text('Já tem uma conta?',
+                          style: TextStyle(color: Colors.white70)),
                       TextButton(
-                        onPressed: () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const login(),
-                            ),
-                          );
-                        },
+                        onPressed: () =>
+                            Navigator.pushReplacementNamed(context, '/login'),
                         child: const Text(
                           'Entrar',
                           style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
                         ),
                       ),
                     ],
@@ -301,6 +278,45 @@ class _TelaCadastroState extends State<TelaCadastro> {
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    required bool isDarkMode,
+    bool obscure = false,
+    Widget? suffix,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    final textColor = isDarkMode ? Colors.white : Colors.black87;
+
+    return TextField(
+      controller: controller,
+      obscureText: obscure,
+      keyboardType: keyboardType,
+      style: TextStyle(color: textColor),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: textColor.withOpacity(0.6), fontSize: 14),
+        prefixIcon: Icon(icon, color: const Color(0xFF4CAF50), size: 22),
+        suffixIcon: suffix,
+        filled: true,
+        fillColor: isDarkMode
+            ? Colors.white.withOpacity(0.05)
+            : const Color(0xFFF1F4F8),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(20),
+          borderSide: const BorderSide(color: Color(0xFF4CAF50), width: 2),
         ),
       ),
     );

@@ -8,6 +8,7 @@ class DetalhesChamadoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Define a cor baseada na categoria para um visual dinâmico
     Color categoriaColor;
     IconData categoriaIcon;
 
@@ -48,6 +49,7 @@ class DetalhesChamadoPage extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
+            // Card Principal
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -62,7 +64,7 @@ class DetalhesChamadoPage extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  // Cabeçalho
+                  // Cabeçalho do Card com Foto e Nome
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
@@ -129,36 +131,12 @@ class DetalhesChamadoPage extends StatelessWidget {
                     ),
                   ),
 
-                  // Conteúdo
+                  // Conteúdo do Card
                   Padding(
                     padding: const EdgeInsets.all(24),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // ── Foto do problema (exibe só se existir) ──
-                        if (chamado.imagem != null) ...[
-                          const Text(
-                            'Foto do Problema',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF2C3E50),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
-                            child: Image.file(
-                              chamado.imagem!,
-                              width: double.infinity,
-                              height: 200,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          const SizedBox(height: 30),
-                        ],
-
-                        // ── Descrição ───────────────────────────────
                         const Text(
                           'Descrição do Problema',
                           style: TextStyle(
@@ -178,7 +156,7 @@ class DetalhesChamadoPage extends StatelessWidget {
                         ),
                         const SizedBox(height: 30),
 
-                        // ── Contato ────────────────────────────────
+                        // Seção de Contato
                         const Text(
                           'Informações de Contato',
                           style: TextStyle(
@@ -196,12 +174,13 @@ class DetalhesChamadoPage extends StatelessWidget {
 
                         const SizedBox(height: 40),
 
-                        // ── Botão aceitar ──────────────────────────
+                        // Botões de Ação
                         Row(
                           children: [
                             Expanded(
                               child: ElevatedButton(
                                 onPressed: () {
+                                  // Lógica para aceitar
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                         content:

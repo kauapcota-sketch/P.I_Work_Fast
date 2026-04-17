@@ -99,7 +99,6 @@ class _TelaChamadoState extends State<TelaChamado> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                
                 Row(
                   children: [
                     CircleAvatar(
@@ -141,10 +140,7 @@ class _TelaChamadoState extends State<TelaChamado> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 18),
-
-                
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: Image.network(
@@ -178,10 +174,7 @@ class _TelaChamadoState extends State<TelaChamado> {
                     },
                   ),
                 ),
-
                 const SizedBox(height: 18),
-
-                
                 const Text(
                   'Descrição',
                   style: TextStyle(
@@ -190,9 +183,7 @@ class _TelaChamadoState extends State<TelaChamado> {
                     color: Color(0xFF1B2A38),
                   ),
                 ),
-
                 const SizedBox(height: 8),
-
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(14),
@@ -210,10 +201,7 @@ class _TelaChamadoState extends State<TelaChamado> {
                     textAlign: TextAlign.justify,
                   ),
                 ),
-
                 const SizedBox(height: 24),
-
-                
                 SizedBox(
                   width: double.infinity,
                   height: 50,
@@ -233,10 +221,7 @@ class _TelaChamadoState extends State<TelaChamado> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 12),
-
-                
                 SizedBox(
                   width: double.infinity,
                   height: 50,

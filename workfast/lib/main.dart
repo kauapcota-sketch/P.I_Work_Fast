@@ -1,186 +1,69 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:workfast/auth_service.dart';
 import 'package:workfast/cadastro.dart';
+import 'package:workfast/buscar_trabalho.dart';
 import 'package:workfast/login.dart';
+import 'package:workfast/perfil.dart';
+import 'package:workfast/configuracoes_page.dart';
+import 'package:workfast/registrar_problema_page.dart';
 
-void main() => runApp(const MyApp());
+// Gerenciador de Tema Global
+final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // INICIALIZA O HIVE PARA PERSISTÊNCIA
+  await Hive.initFlutter();
+  await AuthService.init(); // Inicializa o box de usuários
+
+  runApp(const WorkFastApp());
+}
+
+class WorkFastApp extends StatelessWidget {
+  const WorkFastApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: TelaInicial(),
-     
-    );
-  }
-}
-
-class TelaInicial extends StatelessWidget {
-  const TelaInicial({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF27485F),
-              Color(0xFF4A7A99),
-            ],
-          ),
-        ),
-        child: Stack(
-          children: [
-            Center(
-              child: Opacity(
-                opacity: 0.70,
-                child: Image.asset(
-                  '',
-                  width: 700,
-                  height: 700,
-                  fit: BoxFit.contain,
-                ),
-              ),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeNotifier,
+      builder: (_, currentThemeMode, __) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'WorkFast',
+          theme: ThemeData(
+            primarySwatch: Colors.green,
+            brightness: Brightness.light,
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Color(0xFF2C3E50),
+              foregroundColor: Colors.white,
             ),
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text(
-                      'Bem-vindo',
-                      style: TextStyle(
-                        color: Colors.white, // Corrigido para branco
-                        fontSize: 34,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    const Text(
-                      'Entre para continuar',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white70, // Corrigido para branco
-                        fontSize: 20, // Ajustado tamanho
-                      ),
-                    ),
-
-                    const SizedBox(height: 90),
-
-                    BotaoAnimado(
-                      texto: 'LOGAR',
-                      onTap: () {
-                        Navigator.pushReplacement(
-                          // ← pushReplacement
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const login(),
-                          ),
-                        );
-                      },
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    // ← BOTÃO CADASTRO ADICIONAL
-                    BotaoAnimado(
-                      texto: 'CADASTRAR',
-                      onTap: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const Cadastro(),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class BotaoAnimado extends StatefulWidget {
-  final String texto;
-  final VoidCallback onTap;
-
-  const BotaoAnimado({
-    super.key,
-    required this.texto,
-    required this.onTap,
-  });
-
-  @override
-  State<BotaoAnimado> createState() => _BotaoAnimadoState();
-}
-
-class _BotaoAnimadoState extends State<BotaoAnimado> {
-  double _scale = 1.0;
-
-  void _pressionar() {
-    setState(() {
-      _scale = 0.95;
-    });
-  }
-
-  void _soltar() {
-    setState(() {
-      _scale = 1.0;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: widget.onTap,
-      onTapDown: (_) => _pressionar(),
-      onTapUp: (_) => _soltar(),
-      onTapCancel: _soltar,
-      child: AnimatedScale(
-        scale: _scale,
-        duration: const Duration(milliseconds: 120),
-        curve: Curves.easeInOut,
-        child: Container(
-          width: 250,
-          height: 58,
-          margin: const EdgeInsets.only(bottom: 10), // Espaçamento
-          decoration: BoxDecoration(
-            color: const Color(0xFF27485F),
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 10,
-                offset: Offset(0, 5),
-              ),
-            ],
+            scaffoldBackgroundColor: const Color(0xFFECEFF1),
+            cardColor: Colors.white,
           ),
-          child: Center(
-            child: Text(
-              widget.texto,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1,
-              ),
+          darkTheme: ThemeData(
+            primarySwatch: Colors.green,
+            brightness: Brightness.dark,
+            appBarTheme: const AppBarTheme(
+              backgroundColor: Color(0xFF1B2836),
+              foregroundColor: Colors.white,
             ),
+            scaffoldBackgroundColor: const Color(0xFF1B2836),
+            cardColor: const Color(0xFF2C3E50),
           ),
-        ),
-      ),
+          themeMode: currentThemeMode,
+          initialRoute: '/login',
+          routes: {
+            '/login': (context) => const LoginPage(),
+            '/cadastro': (context) => const CadastroPage(),
+            '/home': (context) => const busctrabalho(),
+            '/perfil': (context) => const PerfilPage(),
+            '/configuracoes': (context) => const ConfiguracoesPage(),
+            '/registrar_problema': (context) => const registraProblema(),
+          },
+        );
+      },
     );
   }
 }

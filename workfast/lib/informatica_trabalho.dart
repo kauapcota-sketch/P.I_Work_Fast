@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:workfast/buscar_trabalho.dart';
 import 'package:workfast/chamado_model.dart';
-import 'package:workfast/main.dart'; // Importa o CardChamado
 
 class InformaticaTrabalho extends StatelessWidget {
   const InformaticaTrabalho({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final informaticaChamados = ChamadoService.getChamadosPorCategoria(CategoriaChamado.informatica);
+    final informaticaChamados =
+        ChamadoService.getChamadosPorCategoria(CategoriaChamado.informatica);
 
     return Scaffold(
       backgroundColor: const Color(0xFF2C3E50),
