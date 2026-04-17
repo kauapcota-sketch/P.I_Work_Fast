@@ -1,6 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  await Hive.openBox('perfil');
+
   runApp(const TelaTrabalhoApp());
 }
 
@@ -20,8 +26,36 @@ class TelaTrabalhoApp extends StatelessWidget {
   }
 }
 
-class TelaChamado extends StatelessWidget {
+class TelaChamado extends StatefulWidget {
   const TelaChamado({super.key});
+
+  @override
+  State<TelaChamado> createState() => _TelaChamadoState();
+}
+
+class _TelaChamadoState extends State<TelaChamado> {
+  File? imagem;
+
+  @override
+  void initState() {
+    super.initState();
+    carregarImagem();
+  }
+
+  Future<void> carregarImagem() async {
+    var box = Hive.box('perfil');
+
+    String? caminhoImagem = box.get('imagem');
+
+    if (caminhoImagem != null) {
+      final file = File(caminhoImagem);
+      if (await file.exists()) {
+        setState(() {
+          imagem = file;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,23 +97,26 @@ class TelaChamado extends StatelessWidget {
               ],
             ),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Cabeçalho do usuário
+                
                 Row(
                   children: [
                     CircleAvatar(
-                     radius: 24,
+                      radius: 24,
                       backgroundColor: Colors.blueAccent,
-                      child: const Text(
-                        'P',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      backgroundImage:
+                          imagem != null ? FileImage(imagem!) : null,
+                      child: imagem == null
+                          ? const Text(
+                              'P',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            )
+                          : null,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -107,7 +144,7 @@ class TelaChamado extends StatelessWidget {
 
                 const SizedBox(height: 18),
 
-                // Imagem do problema
+                
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: Image.network(
@@ -115,14 +152,8 @@ class TelaChamado extends StatelessWidget {
                     width: double.infinity,
                     height: 180,
                     fit: BoxFit.cover,
-                    loadingBuilder: (
-                      BuildContext context,
-                      Widget child,
-                      ImageChunkEvent? loadingProgress,
-                    ) {
-                      if (loadingProgress == null) {
-                        return child;
-                      }
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
 
                       return Container(
                         height: 180,
@@ -132,11 +163,7 @@ class TelaChamado extends StatelessWidget {
                         ),
                       );
                     },
-                    errorBuilder: (
-                      BuildContext context,
-                      Object error,
-                      StackTrace? stackTrace,
-                    ) {
+                    errorBuilder: (context, error, stackTrace) {
                       return Container(
                         height: 180,
                         color: Colors.grey.shade300,
@@ -154,7 +181,7 @@ class TelaChamado extends StatelessWidget {
 
                 const SizedBox(height: 18),
 
-                // Descrição
+                
                 const Text(
                   'Descrição',
                   style: TextStyle(
@@ -174,7 +201,7 @@ class TelaChamado extends StatelessWidget {
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: const Text(
-                    'Meu computador desligou de repente e agora não liga mais. Quando tento ligar, às vezes as luzes acendem por um instante, mas não aparece nada na tela e ele desliga logo em seguida. Já testei a tomada e o cabo de energia, mas o problema continua.',
+                    'Meu computador desligou de repente e agora não liga mais...',
                     style: TextStyle(
                       fontSize: 14,
                       height: 1.5,
@@ -186,7 +213,7 @@ class TelaChamado extends StatelessWidget {
 
                 const SizedBox(height: 24),
 
-                // Botão aceitar
+                
                 SizedBox(
                   width: double.infinity,
                   height: 50,
@@ -203,17 +230,13 @@ class TelaChamado extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                       foregroundColor: Colors.white,
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
                     ),
                   ),
                 ),
 
                 const SizedBox(height: 12),
 
-                // Botão voltar
+                
                 SizedBox(
                   width: double.infinity,
                   height: 50,
@@ -227,16 +250,6 @@ class TelaChamado extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.green.shade700,
-                      side: BorderSide(
-                        color: Colors.green.shade700,
-                        width: 2,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
                       ),
                     ),
                   ),
