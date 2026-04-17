@@ -95,6 +95,11 @@ class ChamadoService {
     ),
   ];
 
+  // NOVO: método para adicionar chamados registrados pelo usuário
+  static void adicionarChamado(Chamado chamado) {
+    _todosChamados.insert(0, chamado); // Insere no topo da lista
+  }
+
   static List<Chamado> getChamadosPorCategoria(CategoriaChamado categoria) {
     if (categoria == CategoriaChamado.geral) {
       return _todosChamados;

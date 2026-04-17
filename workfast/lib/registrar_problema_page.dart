@@ -1,21 +1,20 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:workfast/chamado_model.dart';
 
-void main() {
-  runApp(const registraProblema());
-}
+// REMOVIDO: 'dart:io', 'image_picker', 'url_launcher'
+// Motivo: o envio não deve abrir apps externos; deve registrar no ChamadoService
+
+// REMOVIDO: void main() e o wrapper MaterialApp
+// Motivo: wrapping com MaterialApp próprio quebrava a navegação (tela preta ao voltar),
+// porque o Navigator.pop perdia o contexto do app principal.
 
 class registraProblema extends StatelessWidget {
   const registraProblema({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: RegistrarProblemaPage(),
-    );
+    // Agora é apenas um Scaffold simples, sem MaterialApp
+    return const RegistrarProblemaPage();
   }
 }
 
@@ -27,110 +26,25 @@ class RegistrarProblemaPage extends StatefulWidget {
 }
 
 class _RegistrarProblemaPageState extends State<RegistrarProblemaPage> {
-  File? imagemSelecionada;
   bool isLoading = false;
 
+  final nomeController = TextEditingController();
   final descricaoController = TextEditingController();
-  final contatoController = TextEditingController();
+  final telefoneController = TextEditingController();
+  final emailController = TextEditingController();
 
   String categoriaEscolhida = 'Elétrica';
-  String formaContato = 'Whatsapp';
 
-  final picker = ImagePicker();
-
-  final List<Map<String, String>> categorias = [
-    {'nome': 'Elétrica', 'emoji': '🟡'},
-    {'nome': 'Estrutural', 'emoji': '🟤'},
-    {'nome': 'Informática', 'emoji': '🖥️'},
-    {'nome': 'Outro', 'emoji': '❓'},
+  final List<Map<String, dynamic>> categorias = [
+    {'nome': 'Elétrica', 'emoji': '🟡', 'valor': CategoriaChamado.eletrica},
+    {'nome': 'Estrutural', 'emoji': '🟤', 'valor': CategoriaChamado.estrutural},
+    {
+      'nome': 'Informática',
+      'emoji': '🖥️',
+      'valor': CategoriaChamado.informatica
+    },
+    {'nome': 'Geral', 'emoji': '❓', 'valor': CategoriaChamado.geral},
   ];
-
-  Future<void> selecionarImagem(ImageSource source) async {
-    try {
-      final XFile? imagem = await picker.pickImage(
-        source: source,
-        imageQuality: 80,
-      );
-
-      if (imagem != null && mounted) {
-        setState(() {
-          imagemSelecionada = File(imagem.path);
-        });
-      }
-    } catch (e) {
-      if (mounted) mostrarSnack('Erro ao selecionar imagem', erro: true);
-    }
-  }
-
-  Future<void> enviar() async {
-    final descricao = descricaoController.text.trim();
-    final contato = contatoController.text.trim();
-
-    if (descricao.isEmpty) {
-      mostrarSnack('Descreva o problema.', erro: true);
-      return;
-    }
-
-    if (contato.isEmpty) {
-      mostrarSnack('Informe um contato.', erro: true);
-      return;
-    }
-
-    final mensagem = '''
-Olá! Estou registrando um problema.
-
-Categoria: $categoriaEscolhida
-Descrição: $descricao
-Contato ($formaContato): $contato
-${imagemSelecionada != null ? '\n*Foto do problema anexada*' : ''}
-''';
-
-    setState(() => isLoading = true);
-
-    try {
-      Uri uri;
-
-      switch (formaContato) {
-        case 'Whatsapp':
-          final numero = contato.replaceAll(RegExp(r'[^0-9]'), '');
-          uri = Uri.parse(
-              'https://wa.me/$numero?text=${Uri.encodeComponent(mensagem)}');
-          break;
-        case 'Telefone':
-          final numero = contato.replaceAll(RegExp(r'[^0-9]'), '');
-          uri = Uri.parse('tel:$numero');
-          break;
-        case 'Email':
-          uri = Uri(
-            scheme: 'mailto',
-            path: contato,
-            queryParameters: {
-              'subject': 'Problema: $categoriaEscolhida',
-              'body': mensagem,
-            },
-          );
-          break;
-        default:
-          throw Exception('Forma de contato inválida');
-      }
-
-      if (mounted) {
-        await launchUrl(
-          uri,
-          mode: LaunchMode.externalApplication,
-        );
-        mostrarSnack('Problema enviado com sucesso!');
-      }
-    } catch (e) {
-      if (mounted) {
-        mostrarSnack(
-            'Não foi possível enviar. Verifique sua conexão ou app instalado.',
-            erro: true);
-      }
-    } finally {
-      if (mounted) setState(() => isLoading = false);
-    }
-  }
 
   void mostrarSnack(String texto, {bool erro = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -143,36 +57,74 @@ ${imagemSelecionada != null ? '\n*Foto do problema anexada*' : ''}
     );
   }
 
-  String get hintContato {
-    return switch (formaContato) {
-      'Whatsapp' => '(11) 99999-9999',
-      'Telefone' => '(11) 3333-3333',
-      'Email' => 'email@exemplo.com',
-      _ => '',
-    };
+  void enviar() {
+    final nome = nomeController.text.trim();
+    final descricao = descricaoController.text.trim();
+    final telefone = telefoneController.text.trim();
+    final email = emailController.text.trim();
+
+    if (nome.isEmpty) {
+      mostrarSnack('Informe seu nome.', erro: true);
+      return;
+    }
+    if (descricao.isEmpty) {
+      mostrarSnack('Descreva o problema.', erro: true);
+      return;
+    }
+    if (telefone.isEmpty) {
+      mostrarSnack('Informe um telefone de contato.', erro: true);
+      return;
+    }
+    if (email.isEmpty) {
+      mostrarSnack('Informe um email de contato.', erro: true);
+      return;
+    }
+
+    // Encontra o enum da categoria selecionada
+    final categoriaSelecionada = categorias.firstWhere(
+      (c) => c['nome'] == categoriaEscolhida,
+    )['valor'] as CategoriaChamado;
+
+    // Registra o chamado diretamente no ChamadoService
+    final novoChamado = Chamado(
+      nome: nome,
+      descricao: descricao,
+      telefone: telefone,
+      email: email,
+      categoria: categoriaSelecionada,
+    );
+
+    ChamadoService.adicionarChamado(novoChamado);
+
+    mostrarSnack('Problema registrado com sucesso!');
+
+    // Volta para a tela anterior e avisa que houve novo chamado
+    Future.delayed(const Duration(milliseconds: 800), () {
+      if (mounted) Navigator.pop(context, true);
+    });
   }
 
   @override
   void dispose() {
+    nomeController.dispose();
     descricaoController.dispose();
-    contatoController.dispose();
+    telefoneController.dispose();
+    emailController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF5B9BD5),
+      backgroundColor: const Color(0xFF2C3E50),
       appBar: AppBar(
         title: const Text('Registrar Problema'),
-        backgroundColor: const Color(0xFF5B9BD5),
+        backgroundColor: const Color(0xFF2C3E50),
         elevation: 0,
         foregroundColor: Colors.white,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       body: SingleChildScrollView(
@@ -193,104 +145,28 @@ ${imagemSelecionada != null ? '\n*Foto do problema anexada*' : ''}
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Image picker
-              GestureDetector(
-                onTap: () => showModalBottomSheet(
-                  context: context,
-                  backgroundColor: Colors.grey[100],
-                  shape: const RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(20)),
+              // Nome
+              const Text(
+                'Seu nome',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: nomeController,
+                textCapitalization: TextCapitalization.words,
+                decoration: InputDecoration(
+                  hintText: 'Ex: João Silva',
+                  prefixIcon: const Icon(Icons.person_outline),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  builder: (_) => SafeArea(
-                    child: Wrap(
-                      children: [
-                        ListTile(
-                          leading:
-                              const Icon(Icons.camera_alt, color: Colors.blue),
-                          title: const Text('Tirar foto'),
-                          onTap: () {
-                            Navigator.pop(context);
-                            selecionarImagem(ImageSource.camera);
-                          },
-                        ),
-                        ListTile(
-                          leading: const Icon(Icons.photo_library,
-                              color: Colors.blue),
-                          title: const Text('Escolher da galeria'),
-                          onTap: () {
-                            Navigator.pop(context);
-                            selecionarImagem(ImageSource.gallery);
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                child: Container(
-                  width: double.infinity,
-                  height: 160,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[50],
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: imagemSelecionada != null
-                          ? Colors.green
-                          : Colors.blue.withOpacity(0.5),
-                      width: 2,
-                    ),
-                  ),
-                  child: imagemSelecionada == null
-                      ? const Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.add_a_photo,
-                                size: 48, color: Colors.grey),
-                            SizedBox(height: 8),
-                            Text(
-                              'Toque para adicionar foto',
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                          ],
-                        )
-                      : Stack(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(14),
-                              child: Image.file(
-                                imagemSelecionada!,
-                                width: double.infinity,
-                                height: 160,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                            Positioned(
-                              top: 8,
-                              right: 8,
-                              child: GestureDetector(
-                                onTap: () =>
-                                    setState(() => imagemSelecionada = null),
-                                child: Container(
-                                  padding: const EdgeInsets.all(4),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.black54,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.close,
-                                    color: Colors.white,
-                                    size: 20,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                  filled: true,
+                  fillColor: Colors.grey[50],
                 ),
               ),
               const SizedBox(height: 24),
 
-              // Description
+              // Descrição
               const Text(
                 'Descrição do problema',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -311,7 +187,7 @@ ${imagemSelecionada != null ? '\n*Foto do problema anexada*' : ''}
               ),
               const SizedBox(height: 24),
 
-              // Category
+              // Categoria
               const Text(
                 'Categoria',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -329,12 +205,12 @@ ${imagemSelecionada != null ? '\n*Foto do problema anexada*' : ''}
                     value: categoriaEscolhida,
                     items: categorias.map((categoria) {
                       return DropdownMenuItem<String>(
-                        value: categoria['nome'],
+                        value: categoria['nome'] as String,
                         child: Row(
                           children: [
-                            Text(categoria['emoji']!),
+                            Text(categoria['emoji'] as String),
                             const SizedBox(width: 8),
-                            Text(categoria['nome']!),
+                            Text(categoria['nome'] as String),
                           ],
                         ),
                       );
@@ -349,59 +225,39 @@ ${imagemSelecionada != null ? '\n*Foto do problema anexada*' : ''}
               ),
               const SizedBox(height: 24),
 
-              // Contact method
+              // Telefone
               const Text(
-                'Forma de contato',
+                'Telefone de contato',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 12),
-              ...['Whatsapp', 'Telefone', 'Email'].map((item) {
-                return RadioListTile<String>(
-                  title: Row(
-                    children: [
-                      Icon(
-                        switch (item) {
-                          'Whatsapp' => Icons.message,
-                          'Telefone' => Icons.phone,
-                          'Email' => Icons.email,
-                          _ => Icons.contact_mail,
-                        },
-                        color:
-                            formaContato == item ? Colors.green : Colors.grey,
-                      ),
-                      const SizedBox(width: 12),
-                      Text(item),
-                    ],
+              TextField(
+                controller: telefoneController,
+                keyboardType: TextInputType.phone,
+                decoration: InputDecoration(
+                  hintText: '(11) 99999-9999',
+                  prefixIcon: const Icon(Icons.phone_outlined),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  value: item,
-                  groupValue: formaContato,
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() => formaContato = value);
-                      // Clear contact field when changing method
-                      contatoController.clear();
-                    }
-                  },
-                );
-              }),
+                  filled: true,
+                  fillColor: Colors.grey[50],
+                ),
+              ),
+              const SizedBox(height: 24),
 
+              // Email
+              const Text(
+                'Email de contato',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
               const SizedBox(height: 12),
               TextField(
-                controller: contatoController,
-                keyboardType: formaContato == 'Email'
-                    ? TextInputType.emailAddress
-                    : TextInputType.phone,
+                controller: emailController,
+                keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
-                  labelText: 'Contato',
-                  hintText: hintContato,
-                  prefixIcon: Icon(
-                    switch (formaContato) {
-                      'Whatsapp' => Icons.message,
-                      'Telefone' => Icons.phone,
-                      'Email' => Icons.email,
-                      _ => Icons.contact_mail,
-                    },
-                  ),
+                  hintText: 'email@exemplo.com',
+                  prefixIcon: const Icon(Icons.email_outlined),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -411,14 +267,14 @@ ${imagemSelecionada != null ? '\n*Foto do problema anexada*' : ''}
               ),
               const SizedBox(height: 32),
 
-              // Send button
+              // Botão enviar
               SizedBox(
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
                   onPressed: isLoading ? null : enviar,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
+                    backgroundColor: const Color(0xFF4CAF50),
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -434,12 +290,19 @@ ${imagemSelecionada != null ? '\n*Foto do problema anexada*' : ''}
                             strokeWidth: 2,
                           ),
                         )
-                      : const Text(
-                          'ENVIAR PROBLEMA',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      : const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.check_circle_outline),
+                            SizedBox(width: 10),
+                            Text(
+                              'REGISTRAR PROBLEMA',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
                 ),
               ),
