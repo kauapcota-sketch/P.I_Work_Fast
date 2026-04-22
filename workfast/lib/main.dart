@@ -3,6 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:workfast/auth_service.dart';
 import 'package:workfast/cadastro.dart';
 import 'package:workfast/buscar_trabalho.dart';
+import 'package:workfast/esqueci_senha_page.dart';
 import 'package:workfast/login.dart';
 import 'package:workfast/perfil.dart';
 import 'package:workfast/configuracoes_page.dart';
@@ -13,11 +14,8 @@ final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // INICIALIZA O HIVE PARA PERSISTÊNCIA
   await Hive.initFlutter();
-  await AuthService.init(); // Inicializa o box de usuários
-
+  await AuthService.init();
   runApp(const WorkFastApp());
 }
 
@@ -61,6 +59,7 @@ class WorkFastApp extends StatelessWidget {
             '/perfil': (context) => const PerfilPage(),
             '/configuracoes': (context) => const ConfiguracoesPage(),
             '/registrar_problema': (context) => const registraProblema(),
+            '/esqueci_senha': (context) => const EsqueciSenhaPage(),
           },
         );
       },

@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
-import 'dart:io';
-import 'package:hive_flutter/hive_flutter.dart';
 
 class PerfilPage extends StatefulWidget {
   const PerfilPage({super.key});
@@ -31,7 +29,6 @@ class _PerfilPageState extends State<PerfilPage> {
   }
 
   Future<void> _initHive() async {
-    await Hive.initFlutter();
     box = await Hive.openBox('perfil');
     await _carregarDados();
   }
@@ -41,24 +38,16 @@ class _PerfilPageState extends State<PerfilPage> {
     descricaoController.text = box!.get('descricao', defaultValue: '');
     telefoneController.text = box!.get('telefone', defaultValue: '');
     emailController.text = box!.get('email', defaultValue: '');
+    experiencias =
+        List<String>.from(box!.get('experiencias', defaultValue: <String>[]));
 
-    experiencias = List<String>.from(
-      box!.get('experiencias', defaultValue: <String>[]),
-    );
-
-    String? caminhoImagem = box!.get('imagem');
+    final caminhoImagem = box!.get('imagem') as String?;
     if (caminhoImagem != null) {
       final file = File(caminhoImagem);
-      if (await file.exists()) {
-        imagem = file;
-      }
+      if (await file.exists()) imagem = file;
     }
 
-    if (mounted) {
-      setState(() {
-        isLoading = false;
-      });
-    }
+    if (mounted) setState(() => isLoading = false);
   }
 
   @override
@@ -71,41 +60,31 @@ class _PerfilPageState extends State<PerfilPage> {
   }
 
   Future<void> escolherImagem() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null && mounted) {
-      final directory = await getApplicationDocumentsDirectory();
+    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (picked != null && mounted) {
+      final dir = await getApplicationDocumentsDirectory();
       final newPath =
-          '${directory.path}/perfil_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final newFile = await File(pickedFile.path).copy(newPath);
-
-      if (mounted) {
-        setState(() {
-          imagem = newFile;
-        });
-      }
+          '${dir.path}/perfil_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final newFile = await File(picked.path).copy(newPath);
+      setState(() => imagem = newFile);
     }
   }
 
   Future<void> salvarDados() async {
     if (box == null) return;
-
     await box!.put('nome', nomeController.text.trim());
     await box!.put('descricao', descricaoController.text.trim());
     await box!.put('telefone', telefoneController.text.trim());
     await box!.put('email', emailController.text.trim());
     await box!.put('experiencias', experiencias);
-
-    if (imagem != null) {
-      await box!.put('imagem', imagem!.path);
-    }
+    if (imagem != null) await box!.put('imagem', imagem!.path);
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('✅ Dados salvos com sucesso!'),
-          backgroundColor: Colors.green,
+          content: Text('✅ Perfil salvo com sucesso!'),
+          backgroundColor: Color(0xFF4CAF50),
+          behavior: SnackBarBehavior.floating,
           duration: Duration(seconds: 2),
         ),
       );
@@ -113,328 +92,316 @@ class _PerfilPageState extends State<PerfilPage> {
   }
 
   void adicionarExperiencia() {
-    final expController = TextEditingController();
-
+    final ctrl = TextEditingController();
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Nova Experiência'),
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Nova Experiência',
+            style: TextStyle(fontWeight: FontWeight.bold)),
         content: TextField(
-          controller: expController,
+          controller: ctrl,
           autofocus: true,
-          decoration: const InputDecoration(
-            hintText: 'Ex: Desenvolvedor Mobile - 2 anos',
-            border: OutlineInputBorder(),
-          ),
           maxLines: 2,
+          decoration: InputDecoration(
+            hintText: 'Ex: Eletricista Residencial – 3 anos',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          ),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancelar'),
-          ),
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancelar')),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4CAF50),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12))),
             onPressed: () {
-              final texto = expController.text.trim();
-              if (texto.isNotEmpty) {
-                setState(() {
-                  experiencias.add(texto);
-                });
-                Navigator.of(context).pop();
+              final t = ctrl.text.trim();
+              if (t.isNotEmpty) {
+                setState(() => experiencias.add(t));
+                Navigator.pop(ctx);
               }
             },
             child: const Text('Adicionar'),
           ),
         ],
       ),
-    ).then((_) {
-      expController.dispose();
-    });
-  }
-
-  void removerExperiencia(String experiencia) {
-    setState(() {
-      experiencias.remove(experiencia);
-    });
-  }
-
-  Widget _campoContato({
-    required IconData icon,
-    required TextEditingController controller,
-    required String hint,
-    required Color cor,
-  }) {
-    return TextField(
-      controller: controller,
-      keyboardType:
-          hint == 'Email' ? TextInputType.emailAddress : TextInputType.phone,
-      decoration: InputDecoration(
-        prefixIcon: Icon(icon, color: cor),
-        filled: true,
-        fillColor: Colors.grey[200],
-        hintText: hint,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-      ),
-    );
+    ).then((_) => ctrl.dispose());
   }
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading || box == null) {
+    if (isLoading) {
       return const Scaffold(
-        backgroundColor: Color(0xFF1E2A38),
-        body: Center(
-          child: CircularProgressIndicator(color: Colors.white),
-        ),
+        backgroundColor: Color(0xFF2C3E50),
+        body: Center(child: CircularProgressIndicator(color: Colors.white)),
       );
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF1E2A38),
+      backgroundColor: const Color(0xFF2C3E50),
       body: SafeArea(
         child: Column(
           children: [
-            // 🔙 APP BAR COM BOTÃO VOLTAR
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E2A38),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
+            // ── Header ──────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Row(
                 children: [
                   IconButton(
+                    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
                     onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.arrow_back_ios,
-                        color: Colors.white, size: 22),
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.white.withOpacity(0.2),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
                   ),
-                  const SizedBox(width: 12),
-                  const Text(
-                    'Perfil',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                  const Text('Meu Perfil',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold)),
+                  const Spacer(),
+                  // Botão salvar no topo (atalho)
+                  TextButton.icon(
+                    onPressed: salvarDados,
+                    icon: const Icon(Icons.save_alt,
+                        color: Color(0xFF4CAF50), size: 20),
+                    label: const Text('Salvar',
+                        style: TextStyle(
+                            color: Color(0xFF4CAF50),
+                            fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
             ),
 
-            // CONTEÚDO PRINCIPAL
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Container(
-                  padding: const EdgeInsets.all(20),
+            // ── Avatar + banner ──────────────────────────────────
+            Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                // Banner de fundo
+                Container(
+                  height: 100,
+                  width: double.infinity,
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(24)),
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF4CAF50), Color(0xFF8BC34A)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(20),
                   ),
+                ),
+                // Avatar sobre o banner
+                Positioned(
+                  bottom: 0,
+                  child: GestureDetector(
+                    onTap: escolherImagem,
+                    child: Stack(
+                      children: [
+                        CircleAvatar(
+                          radius: 52,
+                          backgroundColor: Colors.white,
+                          child: CircleAvatar(
+                            radius: 48,
+                            backgroundColor: const Color(0xFF2C3E50),
+                            backgroundImage:
+                                imagem != null ? FileImage(imagem!) : null,
+                            child: imagem == null
+                                ? const Icon(Icons.person,
+                                    size: 50, color: Colors.white54)
+                                : null,
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 4,
+                          right: 4,
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: const BoxDecoration(
+                              color: Color(0xFF4CAF50),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.camera_alt,
+                                size: 16, color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 60),
+
+            // ── Conteúdo rolável ─────────────────────────────────
+            Expanded(
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Color(0xFFF0F2F5),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+                ),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 30),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(height: 20),
+                      // ── Nome ────────────────────────────────────
+                      _secaoTitulo('Informações Pessoais'),
+                      const SizedBox(height: 14),
+                      _card([
+                        _campoTexto(
+                          controller: nomeController,
+                          label: 'Nome completo',
+                          icon: Icons.person_outline,
+                        ),
+                        const SizedBox(height: 14),
+                        _campoTexto(
+                          controller: descricaoController,
+                          label: 'Sobre você',
+                          icon: Icons.info_outline,
+                          maxLines: 3,
+                        ),
+                      ]),
 
-                      // 👤 FOTO + NOME
+                      const SizedBox(height: 24),
+
+                      // ── Contato ──────────────────────────────────
+                      _secaoTitulo('Contato'),
+                      const SizedBox(height: 14),
+                      _card([
+                        _campoTexto(
+                          controller: telefoneController,
+                          label: 'Telefone',
+                          icon: Icons.phone_outlined,
+                          tipo: TextInputType.phone,
+                        ),
+                        const SizedBox(height: 14),
+                        _campoTexto(
+                          controller: emailController,
+                          label: 'Email',
+                          icon: Icons.email_outlined,
+                          tipo: TextInputType.emailAddress,
+                        ),
+                      ]),
+
+                      const SizedBox(height: 24),
+
+                      // ── Experiências ─────────────────────────────
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
+                          _secaoTitulo('Experiências'),
                           GestureDetector(
-                            onTap: escolherImagem,
-                            child: CircleAvatar(
-                              radius: 38,
-                              backgroundColor: Colors.blue.withOpacity(0.1),
-                              backgroundImage:
-                                  imagem != null ? FileImage(imagem!) : null,
-                              child: imagem == null
-                                  ? const Icon(Icons.person,
-                                      size: 38, color: Colors.blue)
-                                  : null,
+                            onTap: adicionarExperiencia,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF4CAF50),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: const Row(
+                                children: [
+                                  Icon(Icons.add,
+                                      color: Colors.white, size: 18),
+                                  SizedBox(width: 4),
+                                  Text('Adicionar',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 13)),
+                                ],
+                              ),
                             ),
                           ),
-                          const SizedBox(width: 15),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Nome do usuário',
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+
+                      if (experiencias.isEmpty)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Column(
+                            children: [
+                              Icon(Icons.work_outline,
+                                  size: 36, color: Colors.grey),
+                              SizedBox(height: 8),
+                              Text('Nenhuma experiência adicionada.',
                                   style: TextStyle(
-                                      fontSize: 12, color: Colors.grey),
+                                      color: Colors.grey, fontSize: 14)),
+                            ],
+                          ),
+                        )
+                      else
+                        ...experiencias.map(
+                          (exp) => Container(
+                            margin: const EdgeInsets.only(bottom: 10),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 14),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(14),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 3),
                                 ),
-                                const SizedBox(height: 5),
-                                TextField(
-                                  controller: nomeController,
-                                  decoration: InputDecoration(
-                                    filled: true,
-                                    fillColor: Colors.green[100],
-                                    hintText: 'Seu nome',
-                                    contentPadding: const EdgeInsets.symmetric(
-                                        horizontal: 12, vertical: 10),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide.none,
+                              ],
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.work_outline,
+                                    color: Color(0xFF4CAF50), size: 20),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                    child: Text(exp,
+                                        style: const TextStyle(fontSize: 14))),
+                                GestureDetector(
+                                  onTap: () =>
+                                      setState(() => experiencias.remove(exp)),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(6),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red.withOpacity(0.1),
+                                      shape: BoxShape.circle,
                                     ),
-                                    suffixIcon:
-                                        const Icon(Icons.edit, size: 18),
+                                    child: const Icon(Icons.close,
+                                        size: 16, color: Colors.red),
                                   ),
                                 ),
                               ],
                             ),
-                          )
-                        ],
-                      ),
-
-                      const SizedBox(height: 25),
-
-                      // 📝 DESCRIÇÃO
-                      const Text(
-                        'Descrição',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: descricaoController,
-                        maxLines: 3,
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.grey[200],
-                          hintText: 'Fale sobre você...',
-                          contentPadding: const EdgeInsets.all(12),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
                           ),
                         ),
-                      ),
-
-                      const SizedBox(height: 25),
-
-                      // 💼 EXPERIÊNCIAS
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Experiências',
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
-                          InkWell(
-                            onTap: adicionarExperiencia,
-                            borderRadius: BorderRadius.circular(10),
-                            child: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colors.blue[100],
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: const Icon(Icons.add),
-                            ),
-                          )
-                        ],
-                      ),
-
-                      const SizedBox(height: 10),
-
-                      ...experiencias.map(
-                        (exp) => Container(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 10),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[200],
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(child: Text(exp)),
-                              InkWell(
-                                onTap: () => removerExperiencia(exp),
-                                borderRadius: BorderRadius.circular(20),
-                                child: Container(
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: BoxDecoration(
-                                    color: Colors.red.withOpacity(0.1),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    Icons.close,
-                                    size: 16,
-                                    color: Colors.red,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 25),
-
-                      // 📞 CONTATO
-                      const Text(
-                        'Contato',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-
-                      const SizedBox(height: 10),
-
-                      _campoContato(
-                        icon: Icons.phone,
-                        controller: telefoneController,
-                        hint: 'Telefone',
-                        cor: Colors.green,
-                      ),
-
-                      const SizedBox(height: 10),
-
-                      _campoContato(
-                        icon: Icons.email,
-                        controller: emailController,
-                        hint: 'Email',
-                        cor: Colors.indigo,
-                      ),
 
                       const SizedBox(height: 30),
 
-                      // 💾 BOTÃO SALVAR
+                      // ── Botão salvar ─────────────────────────────
                       SizedBox(
                         width: double.infinity,
-                        child: ElevatedButton(
+                        height: 58,
+                        child: ElevatedButton.icon(
                           onPressed: salvarDados,
+                          icon: const Icon(Icons.save_alt),
+                          label: const Text('SALVAR PERFIL',
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold)),
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blueAccent,
-                            padding: const EdgeInsets.all(16),
+                            backgroundColor: const Color(0xFF4CAF50),
+                            foregroundColor: Colors.white,
+                            elevation: 6,
+                            shadowColor:
+                                const Color(0xFF4CAF50).withOpacity(0.4),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 3,
-                          ),
-                          child: const Text(
-                            'SALVAR',
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
+                                borderRadius: BorderRadius.circular(18)),
                           ),
                         ),
                       ),
@@ -444,6 +411,64 @@ class _PerfilPageState extends State<PerfilPage> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _secaoTitulo(String texto) => Text(
+        texto,
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF2C3E50),
+        ),
+      );
+
+  Widget _card(List<Widget> filhos) => Container(
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: filhos,
+        ),
+      );
+
+  Widget _campoTexto({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType tipo = TextInputType.text,
+    int maxLines = 1,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: tipo,
+      maxLines: maxLines,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, color: const Color(0xFF4CAF50), size: 22),
+        filled: true,
+        fillColor: const Color(0xFFF1F4F8),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Color(0xFF4CAF50), width: 2),
         ),
       ),
     );
