@@ -133,10 +133,23 @@ class DetalhesChamadoPage extends StatelessWidget {
 
                   // Conteúdo do Card
                   Padding(
+                    
                     padding: const EdgeInsets.all(24),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        if (chamado.imagem != null) ...[
+                           ClipRRect(
+                             borderRadius: BorderRadius.circular(15),
+                             child: Image.file(
+                               chamado.imagem!,
+                               width: double.infinity,
+                               height: 200,
+                               fit: BoxFit.cover,
+                             ),
+                           ),
+                           const SizedBox(height: 20),
+                         ],
                         const Text(
                           'Descrição do Problema',
                           style: TextStyle(
