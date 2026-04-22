@@ -38,8 +38,14 @@ class _PerfilPageState extends State<PerfilPage> {
     descricaoController.text = box!.get('descricao', defaultValue: '');
     telefoneController.text = box!.get('telefone', defaultValue: '');
     emailController.text = box!.get('email', defaultValue: '');
-    experiencias =
-        List<String>.from(box!.get('experiencias', defaultValue: <String>[]));
+
+    // 🔥 CORREÇÃO AQUI
+    final data = box!.get('experiencias');
+    if (data != null) {
+      experiencias = List<String>.from(data);
+    } else {
+      experiencias = [];
+    }
 
     final caminhoImagem = box!.get('imagem') as String?;
     if (caminhoImagem != null) {
@@ -95,7 +101,8 @@ class _PerfilPageState extends State<PerfilPage> {
     final ctrl = TextEditingController();
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
+      builder: (context) => AlertDialog(
+        // 🔥 pequeno ajuste aqui
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text('Nova Experiência',
             style: TextStyle(fontWeight: FontWeight.bold)),
@@ -110,7 +117,7 @@ class _PerfilPageState extends State<PerfilPage> {
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx),
+              onPressed: () => Navigator.pop(context),
               child: const Text('Cancelar')),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -121,8 +128,13 @@ class _PerfilPageState extends State<PerfilPage> {
             onPressed: () {
               final t = ctrl.text.trim();
               if (t.isNotEmpty) {
-                setState(() => experiencias.add(t));
-                Navigator.pop(ctx);
+                setState(() {
+                  experiencias.add(t);
+                });
+
+                salvarDados(); // 🔥 salva na hora
+
+                Navigator.pop(context);
               }
             },
             child: const Text('Adicionar'),
@@ -146,7 +158,6 @@ class _PerfilPageState extends State<PerfilPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // ── Header ──────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Row(
@@ -161,7 +172,6 @@ class _PerfilPageState extends State<PerfilPage> {
                           fontSize: 22,
                           fontWeight: FontWeight.bold)),
                   const Spacer(),
-                  // Botão salvar no topo (atalho)
                   TextButton.icon(
                     onPressed: salvarDados,
                     icon: const Icon(Icons.save_alt,
@@ -174,12 +184,9 @@ class _PerfilPageState extends State<PerfilPage> {
                 ],
               ),
             ),
-
-            // ── Avatar + banner ──────────────────────────────────
             Stack(
               alignment: Alignment.bottomCenter,
               children: [
-                // Banner de fundo
                 Container(
                   height: 100,
                   width: double.infinity,
@@ -193,7 +200,6 @@ class _PerfilPageState extends State<PerfilPage> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
-                // Avatar sobre o banner
                 Positioned(
                   bottom: 0,
                   child: GestureDetector(
@@ -234,8 +240,6 @@ class _PerfilPageState extends State<PerfilPage> {
               ],
             ),
             const SizedBox(height: 60),
-
-            // ── Conteúdo rolável ─────────────────────────────────
             Expanded(
               child: Container(
                 decoration: const BoxDecoration(
@@ -247,7 +251,6 @@ class _PerfilPageState extends State<PerfilPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // ── Nome ────────────────────────────────────
                       _secaoTitulo('Informações Pessoais'),
                       const SizedBox(height: 14),
                       _card([
@@ -264,10 +267,7 @@ class _PerfilPageState extends State<PerfilPage> {
                           maxLines: 3,
                         ),
                       ]),
-
                       const SizedBox(height: 24),
-
-                      // ── Contato ──────────────────────────────────
                       _secaoTitulo('Contato'),
                       const SizedBox(height: 14),
                       _card([
@@ -285,10 +285,7 @@ class _PerfilPageState extends State<PerfilPage> {
                           tipo: TextInputType.emailAddress,
                         ),
                       ]),
-
                       const SizedBox(height: 24),
-
-                      // ── Experiências ─────────────────────────────
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -319,7 +316,6 @@ class _PerfilPageState extends State<PerfilPage> {
                         ],
                       ),
                       const SizedBox(height: 14),
-
                       if (experiencias.isEmpty)
                         Container(
                           width: double.infinity,
@@ -381,10 +377,7 @@ class _PerfilPageState extends State<PerfilPage> {
                             ),
                           ),
                         ),
-
                       const SizedBox(height: 30),
-
-                      // ── Botão salvar ─────────────────────────────
                       SizedBox(
                         width: double.infinity,
                         height: 58,
