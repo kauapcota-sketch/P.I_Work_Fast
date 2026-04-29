@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:workfast/auth_service.dart';
-import 'package:workfast/esqueci_senha_page.dart';
 
 class LoginPage extends StatefulWidget {
   final String? initialUsername;
@@ -27,17 +26,11 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
+    // Preenche automaticamente se vier do cadastro
     if (widget.initialUsername != null)
       _emailController.text = widget.initialUsername!;
     if (widget.initialPassword != null)
       _passwordController.text = widget.initialPassword!;
-  }
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
   }
 
   void _handleLogin() async {
@@ -52,13 +45,19 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     setState(() => _isLoading = true);
+
+    // Pequeno delay para feedback visual
     await Future.delayed(const Duration(milliseconds: 800));
 
+    // VERIFICA OS DADOS NO HIVE (Bando de dados local)
     final loginValido = AuthService.verificarLogin(email, password);
+
     setState(() => _isLoading = false);
 
     if (loginValido) {
-      if (mounted) Navigator.pushReplacementNamed(context, '/home');
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/home');
+      }
     } else {
       setState(() => _errorMessage = 'E-mail ou senha incorretos');
     }
@@ -88,7 +87,7 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Logo
+                  // LOGO E NOME DA EMPRESA
                   Column(
                     children: [
                       Container(
@@ -99,32 +98,40 @@ class _LoginPageState extends State<LoginPage> {
                           border: Border.all(
                               color: Colors.white.withOpacity(0.2), width: 2),
                         ),
-                        child: const Icon(Icons.bolt_rounded,
-                            size: 70, color: Color(0xFF4CAF50)),
+                        child: const Icon(
+                          Icons.bolt_rounded, // Ícone que representa agilidade
+                          size: 70,
+                          color: Color(0xFF4CAF50),
+                        ),
                       ),
                       const SizedBox(height: 15),
-                      const Text('WorkFast',
-                          style: TextStyle(
-                              fontSize: 42,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.white,
-                              letterSpacing: 1.5,
-                              shadows: [
-                                Shadow(
-                                    color: Colors.black26,
-                                    offset: Offset(0, 4),
-                                    blurRadius: 10)
-                              ])),
-                      Text('Serviços Rápidos e Confiáveis',
-                          style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.white.withOpacity(0.8),
-                              letterSpacing: 1.2)),
+                      const Text(
+                        'WorkFast',
+                        style: TextStyle(
+                            fontSize: 42,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                            letterSpacing: 1.5,
+                            shadows: [
+                              Shadow(
+                                  color: Colors.black26,
+                                  offset: Offset(0, 4),
+                                  blurRadius: 10)
+                            ]),
+                      ),
+                      Text(
+                        'Serviços Rápidos e Confiáveis',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white.withOpacity(0.8),
+                          letterSpacing: 1.2,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 50),
 
-                  // Card de login
+                  // CARD DE LOGIN
                   Container(
                     padding: const EdgeInsets.all(28),
                     decoration: BoxDecoration(
@@ -141,48 +148,32 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     child: Column(
                       children: [
-                        Text('LOGIN',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: isDarkMode
-                                  ? Colors.white
-                                  : const Color(0xFF27485F),
-                            )),
+                        Text(
+                          'LOGIN',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: isDarkMode
+                                ? Colors.white
+                                : const Color(0xFF27485F),
+                          ),
+                        ),
                         const SizedBox(height: 25),
-
                         if (_errorMessage != null)
                           Padding(
                             padding: const EdgeInsets.only(bottom: 15),
-                            child: Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.red.shade50,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.red.shade200),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(Icons.error_outline,
-                                      color: Colors.red.shade600, size: 20),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(_errorMessage!,
-                                        style: TextStyle(
-                                            color: Colors.red.shade700,
-                                            fontSize: 14)),
-                                  ),
-                                ],
-                              ),
+                            child: Text(
+                              _errorMessage!,
+                              style: const TextStyle(
+                                  color: Colors.redAccent,
+                                  fontWeight: FontWeight.w600),
                             ),
                           ),
-
                         _buildField(
                           controller: _emailController,
-                          label: 'E-mail',
+                          label: 'E-mail ou Usuário',
                           icon: Icons.email_outlined,
                           isDarkMode: isDarkMode,
-                          tipo: TextInputType.emailAddress,
                         ),
                         const SizedBox(height: 20),
                         _buildField(
@@ -201,32 +192,22 @@ class _LoginPageState extends State<LoginPage> {
                                 setState(() => _obscureText = !_obscureText),
                           ),
                         ),
-                        const SizedBox(height: 6),
-
-                        // ── ESQUECI A SENHA ──────────────────────
+                        const SizedBox(height: 10),
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const EsqueciSenhaPage(),
-                                ),
-                              );
-                            },
-                            child: const Text(
+                            onPressed: () {},
+                            child: Text(
                               'Esqueceu a senha?',
                               style: TextStyle(
-                                color: Color(0xFF4CAF50),
+                                color: const Color(0xFF4CAF50),
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
                               ),
                             ),
                           ),
                         ),
-
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 20),
                         SizedBox(
                           width: double.infinity,
                           height: 60,
@@ -244,11 +225,13 @@ class _LoginPageState extends State<LoginPage> {
                             child: _isLoading
                                 ? const CircularProgressIndicator(
                                     color: Colors.white)
-                                : const Text('ENTRAR',
+                                : const Text(
+                                    'ENTRAR',
                                     style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
-                                        letterSpacing: 1)),
+                                        letterSpacing: 1),
+                                  ),
                           ),
                         ),
                       ],
@@ -264,11 +247,13 @@ class _LoginPageState extends State<LoginPage> {
                       TextButton(
                         onPressed: () =>
                             Navigator.pushNamed(context, '/cadastro'),
-                        child: const Text('Cadastre-se',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16)),
+                        child: const Text(
+                          'Cadastre-se',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16),
+                        ),
                       ),
                     ],
                   ),
@@ -288,13 +273,12 @@ class _LoginPageState extends State<LoginPage> {
     required bool isDarkMode,
     bool obscure = false,
     Widget? suffix,
-    TextInputType tipo = TextInputType.text,
   }) {
     final textColor = isDarkMode ? Colors.white : Colors.black87;
+
     return TextField(
       controller: controller,
       obscureText: obscure,
-      keyboardType: tipo,
       style: TextStyle(color: textColor),
       decoration: InputDecoration(
         labelText: label,

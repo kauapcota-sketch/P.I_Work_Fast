@@ -3,19 +3,39 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:workfast/auth_service.dart';
 import 'package:workfast/cadastro.dart';
 import 'package:workfast/buscar_trabalho.dart';
-import 'package:workfast/esqueci_senha_page.dart';
 import 'package:workfast/login.dart';
 import 'package:workfast/perfil.dart';
 import 'package:workfast/configuracoes_page.dart';
 import 'package:workfast/registrar_problema_page.dart';
+import 'package:workfast/chamado_model.dart';
 
 // Gerenciador de Tema Global
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
 
 void main() async {
+  // Garante que os bindings do Flutter estejam prontos
   WidgetsFlutterBinding.ensureInitialized();
-  await Hive.initFlutter();
-  await AuthService.init();
+
+  try {
+    // 1. Inicializa o Hive
+    await Hive.initFlutter();
+
+    // 2. Registra os Adapters Manuais (que estão no chamado_model.dart)
+    Hive.registerAdapter(CategoriaChamadoAdapter());
+    Hive.registerAdapter(ChamadoAdapter());
+
+    // 3. Abre os boxes necessários
+    await AuthService.init();
+    await ChamadoService.init();
+
+    // Abre o box de perfil se ainda não estiver aberto
+    if (!Hive.isBoxOpen('perfil')) {
+      await Hive.openBox('perfil');
+    }
+  } catch (e) {
+    debugPrint('Erro na inicialização: $e');
+  }
+
   runApp(const WorkFastApp());
 }
 
@@ -59,7 +79,6 @@ class WorkFastApp extends StatelessWidget {
             '/perfil': (context) => const PerfilPage(),
             '/configuracoes': (context) => const ConfiguracoesPage(),
             '/registrar_problema': (context) => const registraProblema(),
-            '/esqueci_senha': (context) => const EsqueciSenhaPage(),
           },
         );
       },

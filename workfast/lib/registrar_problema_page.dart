@@ -68,7 +68,7 @@ class _RegistrarProblemaPageState extends State<RegistrarProblemaPage> {
     );
   }
 
-  void enviar() {
+  void enviar() async {
     final nome = nomeController.text.trim();
     final descricao = descricaoController.text.trim();
     final telefone = telefoneController.text.trim();
@@ -95,13 +95,14 @@ class _RegistrarProblemaPageState extends State<RegistrarProblemaPage> {
         categorias.firstWhere((c) => c['nome'] == categoriaEscolhida)['valor']
             as CategoriaChamado;
 
-    ChamadoService.adicionarChamado(Chamado(
+    // CORREÇÃO: Usando imagemPath em vez de imagem
+    await ChamadoService.adicionarChamado(Chamado(
       nome: nome,
       descricao: descricao,
       telefone: telefone,
       email: email,
       categoria: categoriaSelecionada,
-      imagem: imagemSelecionada,
+      imagemPath: imagemSelecionada?.path, // Passando o caminho do arquivo
     ));
 
     mostrarSnack('Problema registrado com sucesso!');
@@ -306,18 +307,18 @@ class _RegistrarProblemaPageState extends State<RegistrarProblemaPage> {
               const SizedBox(height: 20),
 
               // ── Email ─────────────────────────────────────────
-              _label('Email de contato'),
+              _label('E-mail de contato'),
               const SizedBox(height: 10),
-              _campo(emailController, 'email@exemplo.com', Icons.email_outlined,
+              _campo(emailController, 'seu@email.com', Icons.email_outlined,
                   tipo: TextInputType.emailAddress),
-              const SizedBox(height: 32),
+              const SizedBox(height: 30),
 
-              // ── Botão enviar ──────────────────────────────────
+              // ── Botão Enviar ──────────────────────────────────
               SizedBox(
                 width: double.infinity,
-                height: 56,
+                height: 55,
                 child: ElevatedButton(
-                  onPressed: isLoading ? null : enviar,
+                  onPressed: enviar,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF4CAF50),
                     foregroundColor: Colors.white,
@@ -325,22 +326,9 @@ class _RegistrarProblemaPageState extends State<RegistrarProblemaPage> {
                         borderRadius: BorderRadius.circular(12)),
                     elevation: 2,
                   ),
-                  child: isLoading
-                      ? const SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(
-                              color: Colors.white, strokeWidth: 2))
-                      : const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.check_circle_outline),
-                            SizedBox(width: 10),
-                            Text('REGISTRAR PROBLEMA',
-                                style: TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold)),
-                          ],
-                        ),
+                  child: const Text('REGISTRAR PROBLEMA',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
@@ -350,17 +338,22 @@ class _RegistrarProblemaPageState extends State<RegistrarProblemaPage> {
     );
   }
 
-  Widget _label(String text) => Text(text,
-      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600));
+  Widget _label(String texto) {
+    return Text(
+      texto,
+      style: const TextStyle(
+          fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF2C3E50)),
+    );
+  }
 
-  Widget _campo(TextEditingController ctrl, String hint, IconData icon,
+  Widget _campo(TextEditingController controller, String hint, IconData icon,
       {TextInputType tipo = TextInputType.text}) {
     return TextField(
-      controller: ctrl,
+      controller: controller,
       keyboardType: tipo,
       decoration: InputDecoration(
         hintText: hint,
-        prefixIcon: Icon(icon),
+        prefixIcon: Icon(icon, color: const Color(0xFF4CAF50)),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         filled: true,
         fillColor: Colors.grey[50],

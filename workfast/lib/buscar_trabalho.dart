@@ -3,31 +3,16 @@ import 'package:workfast/perfil.dart';
 import 'package:workfast/registrar_problema_page.dart';
 import 'package:workfast/chamado_model.dart';
 import 'package:workfast/detalhes_chamado_page.dart';
-import 'package:workfast/configuracoes_page.dart'; // Importa a tela de configurações
+import 'package:workfast/configuracoes_page.dart';
 import 'dart:io';
 import 'package:hive_flutter/hive_flutter.dart';
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Hive.initFlutter();
-  await Hive.openBox('perfil');
-
-  runApp(const busctrabalho());
-}
 
 class busctrabalho extends StatelessWidget {
   const busctrabalho({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: const TelaLista(),
-    );
+    return const TelaLista();
   }
 }
 
@@ -41,36 +26,51 @@ class TelaLista extends StatefulWidget {
 class _TelaListaState extends State<TelaLista> {
   CategoriaChamado _categoriaSelecionada = CategoriaChamado.geral;
   List<Chamado> _chamadosExibidos = [];
-
   File? imagem;
 
   @override
-void initState() {
-  super.initState();
-  _filtrarChamados();
-  carregarImagem();
-}
-Future<void> carregarImagem() async {
-  var box = Hive.box('perfil');
+  void initState() {
+    super.initState();
+    _carregarDadosIniciais();
+  }
 
-  String? caminhoImagem = box.get('imagem');
+  void _carregarDadosIniciais() {
+    carregarImagem();
+    _filtrarChamados();
+  }
 
-  if (caminhoImagem != null) {
-    final file = File(caminhoImagem);
-    if (await file.exists()) {
-      setState(() {
-        imagem = file;
-      });
+  Future<void> carregarImagem() async {
+    try {
+      if (!Hive.isBoxOpen('perfil')) {
+        await Hive.openBox('perfil');
+      }
+      var box = Hive.box('perfil');
+      String? caminhoImagem = box.get('imagem');
+
+      if (caminhoImagem != null) {
+        final file = File(caminhoImagem);
+        if (await file.exists()) {
+          if (mounted) {
+            setState(() {
+              imagem = file;
+            });
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Erro ao carregar imagem: $e');
     }
   }
-}
-
 
   void _filtrarChamados() {
-    setState(() {
-      _chamadosExibidos =
-          ChamadoService.getChamadosPorCategoria(_categoriaSelecionada);
-    });
+    try {
+      setState(() {
+        _chamadosExibidos =
+            ChamadoService.getChamadosPorCategoria(_categoriaSelecionada);
+      });
+    } catch (e) {
+      debugPrint('Erro ao filtrar chamados: $e');
+    }
   }
 
   @override
@@ -85,7 +85,6 @@ Future<void> carregarImagem() async {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // BOTÃO DE CONFIGURAÇÕES FUNCIONAL
                   IconButton(
                     icon: const Icon(Icons.settings,
                         color: Colors.white, size: 28),
@@ -100,24 +99,23 @@ Future<void> carregarImagem() async {
                   ),
                   GestureDetector(
                     onTap: () async {
-                     await Navigator.push(
-                       context,
-                       MaterialPageRoute(
-                         builder: (context) => const PerfilPage(),
-                       ),
-                     );
-                   
-                     carregarImagem(); // 🔄 atualiza foto ao voltar
-                   },
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const PerfilPage(),
+                        ),
+                      );
+                      carregarImagem();
+                    },
                     child: CircleAvatar(
-                     radius: 24,
-                     backgroundColor: Colors.blueAccent,
-                     backgroundImage:
-                         imagem != null ? FileImage(imagem!) : null,
-                     child: imagem == null
-                         ? const Icon(Icons.person, color: Colors.white)
-                         : null,
-                   ),
+                      radius: 24,
+                      backgroundColor: Colors.blueAccent,
+                      backgroundImage:
+                          imagem != null ? FileImage(imagem!) : null,
+                      child: imagem == null
+                          ? const Icon(Icons.person, color: Colors.white)
+                          : null,
+                    ),
                   ),
                 ],
               ),
@@ -298,7 +296,9 @@ class CardChamado extends StatelessWidget {
                   radius: 18,
                   backgroundColor: const Color(0xFF4CAF50),
                   child: Text(
-                    chamado.nome[0].toUpperCase(),
+                    chamado.nome.isNotEmpty
+                        ? chamado.nome[0].toUpperCase()
+                        : '?',
                     style: const TextStyle(
                         color: Colors.white, fontWeight: FontWeight.bold),
                   ),
