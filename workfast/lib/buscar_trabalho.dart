@@ -4,6 +4,8 @@ import 'package:workfast/registrar_problema_page.dart';
 import 'package:workfast/chamado_model.dart';
 import 'package:workfast/detalhes_chamado_page.dart';
 import 'package:workfast/configuracoes_page.dart'; // Importa a tela de configurações
+import 'package:workfast/notificacoes_page.dart';
+import 'package:workfast/pontuacao_page.dart';
 import 'dart:io';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -45,26 +47,26 @@ class _TelaListaState extends State<TelaLista> {
   File? imagem;
 
   @override
-void initState() {
-  super.initState();
-  _filtrarChamados();
-  carregarImagem();
-}
-Future<void> carregarImagem() async {
-  var box = Hive.box('perfil');
+  void initState() {
+    super.initState();
+    _filtrarChamados();
+    carregarImagem();
+  }
 
-  String? caminhoImagem = box.get('imagem');
+  Future<void> carregarImagem() async {
+    var box = Hive.box('perfil');
 
-  if (caminhoImagem != null) {
-    final file = File(caminhoImagem);
-    if (await file.exists()) {
-      setState(() {
-        imagem = file;
-      });
+    String? caminhoImagem = box.get('imagem');
+
+    if (caminhoImagem != null) {
+      final file = File(caminhoImagem);
+      if (await file.exists()) {
+        setState(() {
+          imagem = file;
+        });
+      }
     }
   }
-}
-
 
   void _filtrarChamados() {
     setState(() {
@@ -98,26 +100,68 @@ Future<void> carregarImagem() async {
                       );
                     },
                   ),
+                  // BOTÃO DE NOTIFICAÇÕES
+                  Stack(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.notifications_outlined,
+                            color: Colors.white, size: 28),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const NotificacoesPage(),
+                            ),
+                          );
+                        },
+                      ),
+                      Positioned(
+                        right: 6,
+                        top: 6,
+                        child: Container(
+                          width: 10,
+                          height: 10,
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  // BOTÃO DE PONTUAÇÃO
+                  IconButton(
+                    icon: const Icon(Icons.emoji_events_outlined,
+                        color: Colors.amber, size: 28),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const PontuacaoPage(),
+                        ),
+                      );
+                    },
+                  ),
                   GestureDetector(
                     onTap: () async {
-                     await Navigator.push(
-                       context,
-                       MaterialPageRoute(
-                         builder: (context) => const PerfilPage(),
-                       ),
-                     );
-                   
-                     carregarImagem(); // 🔄 atualiza foto ao voltar
-                   },
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const PerfilPage(),
+                        ),
+                      );
+
+                      carregarImagem(); // 🔄 atualiza foto ao voltar
+                    },
                     child: CircleAvatar(
-                     radius: 24,
-                     backgroundColor: Colors.blueAccent,
-                     backgroundImage:
-                         imagem != null ? FileImage(imagem!) : null,
-                     child: imagem == null
-                         ? const Icon(Icons.person, color: Colors.white)
-                         : null,
-                   ),
+                      radius: 24,
+                      backgroundColor: Colors.blueAccent,
+                      backgroundImage:
+                          imagem != null ? FileImage(imagem!) : null,
+                      child: imagem == null
+                          ? const Icon(Icons.person, color: Colors.white)
+                          : null,
+                    ),
                   ),
                 ],
               ),

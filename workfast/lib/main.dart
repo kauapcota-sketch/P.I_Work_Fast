@@ -8,6 +8,8 @@ import 'package:workfast/login.dart';
 import 'package:workfast/perfil.dart';
 import 'package:workfast/configuracoes_page.dart';
 import 'package:workfast/registrar_problema_page.dart';
+import 'package:workfast/notificacoes_page.dart';
+import 'package:workfast/pontuacao_page.dart';
 
 // Gerenciador de Tema Global
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
@@ -60,6 +62,8 @@ class WorkFastApp extends StatelessWidget {
             '/configuracoes': (context) => const ConfiguracoesPage(),
             '/registrar_problema': (context) => const registraProblema(),
             '/esqueci_senha': (context) => const EsqueciSenhaPage(),
+            '/notificacoes': (context) => const NotificacoesPage(),
+            '/pontuacao': (context) => const PontuacaoPage(),
           },
         );
       },
