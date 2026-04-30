@@ -4,6 +4,8 @@ import 'package:workfast/registrar_problema_page.dart';
 import 'package:workfast/chamado_model.dart';
 import 'package:workfast/detalhes_chamado_page.dart';
 import 'package:workfast/configuracoes_page.dart';
+import 'package:workfast/notificacoes_page.dart';
+import 'package:workfast/notificacao_service.dart';
 import 'dart:io';
 import 'package:hive_flutter/hive_flutter.dart';
 
@@ -75,6 +77,8 @@ class _TelaListaState extends State<TelaLista> {
 
   @override
   Widget build(BuildContext context) {
+    final qtdNotificacoes = NotificacaoService.quantidadeNaoLidas;
+
     return Scaffold(
       backgroundColor: const Color(0xFF2C3E50),
       body: SafeArea(
@@ -96,6 +100,50 @@ class _TelaListaState extends State<TelaLista> {
                         ),
                       );
                     },
+                  ),
+                  // Sino de notificações com badge
+                  Stack(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.notifications,
+                            color: Colors.white, size: 28),
+                        onPressed: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const NotificacoesPage(),
+                            ),
+                          );
+                          setState(() {}); // Atualiza badge
+                        },
+                      ),
+                      if (qtdNotificacoes > 0)
+                        Positioned(
+                          right: 8,
+                          top: 8,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 18,
+                              minHeight: 18,
+                            ),
+                            child: Text(
+                              qtdNotificacoes > 9
+                                  ? '9+'
+                                  : '$qtdNotificacoes',
+                              style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                   GestureDetector(
                     onTap: () async {

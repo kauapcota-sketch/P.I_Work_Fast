@@ -8,6 +8,13 @@ import 'package:workfast/perfil.dart';
 import 'package:workfast/configuracoes_page.dart';
 import 'package:workfast/registrar_problema_page.dart';
 import 'package:workfast/chamado_model.dart';
+import 'package:workfast/avaliacao_service.dart';
+import 'package:workfast/notificacao_service.dart';
+import 'package:workfast/pagamento_service.dart';
+import 'package:workfast/politicas_page.dart';
+import 'package:workfast/avaliacao_page.dart';
+import 'package:workfast/notificacoes_page.dart';
+import 'package:workfast/pagamento_page.dart';
 
 // Gerenciador de Tema Global
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
@@ -20,17 +27,40 @@ void main() async {
     // 1. Inicializa o Hive
     await Hive.initFlutter();
 
-    // 2. Registra os Adapters Manuais (que estão no chamado_model.dart)
+    // 2. Registra os Adapters Manuais
     Hive.registerAdapter(CategoriaChamadoAdapter());
     Hive.registerAdapter(ChamadoAdapter());
+    Hive.registerAdapter(AvaliacaoAdapter());
+    Hive.registerAdapter(NotificacaoAdapter());
+    Hive.registerAdapter(PagamentoAdapter());
 
     // 3. Abre os boxes necessários
     await AuthService.init();
     await ChamadoService.init();
+    await AvaliacaoService.init();
+    await NotificacaoService.init();
+    await PagamentoService.init();
 
-    // Abre o box de perfil se ainda não estiver aberto
+    // Abre box de configurações e perfil
     if (!Hive.isBoxOpen('perfil')) {
       await Hive.openBox('perfil');
+    }
+    if (!Hive.isBoxOpen('configuracoes')) {
+      await Hive.openBox('configuracoes');
+    }
+
+    // Simula notificações de demonstração se não houver nenhuma
+    if (NotificacaoService.todas.isEmpty) {
+      await NotificacaoService.simularSolicitacao(
+        nomeProfissional: 'Carlos Eletricista',
+        especializacoes: ['Elétrica Residencial', 'Instalações', '5 anos exp.'],
+        chamadoNome: 'Reparo elétrico urgente',
+      );
+      await NotificacaoService.simularSolicitacao(
+        nomeProfissional: 'João Informática',
+        especializacoes: ['Manutenção PC', 'Redes', 'Formatação'],
+        chamadoNome: 'Computador não liga',
+      );
     }
   } catch (e) {
     debugPrint('Erro na inicialização: $e');
@@ -73,12 +103,15 @@ class WorkFastApp extends StatelessWidget {
           themeMode: currentThemeMode,
           initialRoute: '/login',
           routes: {
-            '/login': (context) => const LoginPage(),
+            '/login': (context) => const PoliticasWrapper(
+                  child: LoginPage(),
+                ),
             '/cadastro': (context) => const CadastroPage(),
             '/home': (context) => const busctrabalho(),
             '/perfil': (context) => const PerfilPage(),
             '/configuracoes': (context) => const ConfiguracoesPage(),
             '/registrar_problema': (context) => const registraProblema(),
+            '/notificacoes': (context) => const NotificacoesPage(),
           },
         );
       },

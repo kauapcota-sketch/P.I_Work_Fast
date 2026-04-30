@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:workfast/avaliacao_service.dart';
 
 class PerfilPage extends StatefulWidget {
   const PerfilPage({super.key});
@@ -18,6 +19,8 @@ class _PerfilPageState extends State<PerfilPage> {
   final emailController = TextEditingController();
 
   List<String> experiencias = [];
+  List<Avaliacao> _avaliacoes = [];
+  double _mediaAvaliacoes = 0.0;
   File? imagem;
   Box? box;
   bool isLoading = true;
@@ -39,7 +42,6 @@ class _PerfilPageState extends State<PerfilPage> {
     telefoneController.text = box!.get('telefone', defaultValue: '');
     emailController.text = box!.get('email', defaultValue: '');
 
-    // 🔥 CORREÇÃO AQUI
     final data = box!.get('experiencias');
     if (data != null) {
       experiencias = List<String>.from(data);
@@ -51,6 +53,13 @@ class _PerfilPageState extends State<PerfilPage> {
     if (caminhoImagem != null) {
       final file = File(caminhoImagem);
       if (await file.exists()) imagem = file;
+    }
+
+    // Carrega avaliações do perfil do usuário logado
+    final nomePerfil = nomeController.text;
+    if (nomePerfil.isNotEmpty) {
+      _avaliacoes = AvaliacaoService.getAvaliacoesDoProfissional(nomePerfil);
+      _mediaAvaliacoes = AvaliacaoService.getMediaNota(nomePerfil);
     }
 
     if (mounted) setState(() => isLoading = false);
@@ -102,7 +111,6 @@ class _PerfilPageState extends State<PerfilPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        // 🔥 pequeno ajuste aqui
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text('Nova Experiência',
             style: TextStyle(fontWeight: FontWeight.bold)),
@@ -131,9 +139,7 @@ class _PerfilPageState extends State<PerfilPage> {
                 setState(() {
                   experiencias.add(t);
                 });
-
-                salvarDados(); // 🔥 salva na hora
-
+                salvarDados();
                 Navigator.pop(context);
               }
             },
@@ -207,28 +213,27 @@ class _PerfilPageState extends State<PerfilPage> {
                     child: Stack(
                       children: [
                         CircleAvatar(
-                          radius: 52,
+                          radius: 50,
                           backgroundColor: Colors.white,
                           child: CircleAvatar(
-                            radius: 48,
-                            backgroundColor: const Color(0xFF2C3E50),
+                            radius: 46,
+                            backgroundColor: Colors.blueAccent,
                             backgroundImage:
                                 imagem != null ? FileImage(imagem!) : null,
                             child: imagem == null
                                 ? const Icon(Icons.person,
-                                    size: 50, color: Colors.white54)
+                                    size: 50, color: Colors.white)
                                 : null,
                           ),
                         ),
                         Positioned(
-                          bottom: 4,
-                          right: 4,
+                          right: 0,
+                          bottom: 0,
                           child: Container(
                             padding: const EdgeInsets.all(6),
                             decoration: const BoxDecoration(
-                              color: Color(0xFF4CAF50),
-                              shape: BoxShape.circle,
-                            ),
+                                color: Color(0xFF4CAF50),
+                                shape: BoxShape.circle),
                             child: const Icon(Icons.camera_alt,
                                 size: 16, color: Colors.white),
                           ),
@@ -241,170 +246,280 @@ class _PerfilPageState extends State<PerfilPage> {
             ),
             const SizedBox(height: 60),
             Expanded(
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF0F2F5),
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-                ),
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 30),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _secaoTitulo('Informações Pessoais'),
-                      const SizedBox(height: 14),
-                      _card([
-                        _campoTexto(
-                          controller: nomeController,
-                          label: 'Nome completo',
-                          icon: Icons.person_outline,
-                        ),
-                        const SizedBox(height: 14),
-                        _campoTexto(
-                          controller: descricaoController,
-                          label: 'Sobre você',
-                          icon: Icons.info_outline,
-                          maxLines: 3,
-                        ),
-                      ]),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Avaliações no topo do perfil
+                    if (_avaliacoes.isNotEmpty) ...[
+                      _buildAvaliacoesPerfil(),
                       const SizedBox(height: 24),
-                      _secaoTitulo('Contato'),
-                      const SizedBox(height: 14),
-                      _card([
-                        _campoTexto(
-                          controller: telefoneController,
-                          label: 'Telefone',
-                          icon: Icons.phone_outlined,
-                          tipo: TextInputType.phone,
-                        ),
-                        const SizedBox(height: 14),
-                        _campoTexto(
-                          controller: emailController,
-                          label: 'Email',
-                          icon: Icons.email_outlined,
-                          tipo: TextInputType.emailAddress,
-                        ),
-                      ]),
-                      const SizedBox(height: 24),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          _secaoTitulo('Experiências'),
-                          GestureDetector(
-                            onTap: adicionarExperiencia,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF4CAF50),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: const Row(
-                                children: [
-                                  Icon(Icons.add,
-                                      color: Colors.white, size: 18),
-                                  SizedBox(width: 4),
-                                  Text('Adicionar',
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 13)),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
+                    ],
+                    _secaoTitulo('Informações Pessoais'),
+                    const SizedBox(height: 14),
+                    _card([
+                      _campoTexto(
+                        controller: nomeController,
+                        label: 'Nome completo',
+                        icon: Icons.person_outline,
                       ),
                       const SizedBox(height: 14),
-                      if (experiencias.isEmpty)
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(20),
+                      _campoTexto(
+                        controller: descricaoController,
+                        label: 'Sobre você',
+                        icon: Icons.info_outline,
+                        maxLines: 3,
+                      ),
+                    ]),
+                    const SizedBox(height: 24),
+                    _secaoTitulo('Contato'),
+                    const SizedBox(height: 14),
+                    _card([
+                      _campoTexto(
+                        controller: telefoneController,
+                        label: 'Telefone',
+                        icon: Icons.phone_outlined,
+                        tipo: TextInputType.phone,
+                      ),
+                      const SizedBox(height: 14),
+                      _campoTexto(
+                        controller: emailController,
+                        label: 'Email',
+                        icon: Icons.email_outlined,
+                        tipo: TextInputType.emailAddress,
+                      ),
+                    ]),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _secaoTitulo('Experiências'),
+                        GestureDetector(
+                          onTap: adicionarExperiencia,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF4CAF50),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Row(
+                              children: [
+                                Icon(Icons.add, color: Colors.white, size: 18),
+                                SizedBox(width: 4),
+                                Text('Adicionar',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 13)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    if (experiencias.isEmpty)
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: const Column(
+                          children: [
+                            Icon(Icons.work_outline,
+                                size: 36, color: Colors.grey),
+                            SizedBox(height: 8),
+                            Text('Nenhuma experiência adicionada.',
+                                style:
+                                    TextStyle(color: Colors.grey, fontSize: 14)),
+                          ],
+                        ),
+                      )
+                    else
+                      ...experiencias.map(
+                        (exp) => Container(
+                          margin: const EdgeInsets.only(bottom: 10),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 14),
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: const Column(
-                            children: [
-                              Icon(Icons.work_outline,
-                                  size: 36, color: Colors.grey),
-                              SizedBox(height: 8),
-                              Text('Nenhuma experiência adicionada.',
-                                  style: TextStyle(
-                                      color: Colors.grey, fontSize: 14)),
+                            borderRadius: BorderRadius.circular(14),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 6,
+                                offset: const Offset(0, 3),
+                              ),
                             ],
                           ),
-                        )
-                      else
-                        ...experiencias.map(
-                          (exp) => Container(
-                            margin: const EdgeInsets.only(bottom: 10),
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 14),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(14),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.05),
-                                  blurRadius: 6,
-                                  offset: const Offset(0, 3),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.work_outline,
-                                    color: Color(0xFF4CAF50), size: 20),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                    child: Text(exp,
-                                        style: const TextStyle(fontSize: 14))),
-                                GestureDetector(
-                                  onTap: () =>
-                                      setState(() => experiencias.remove(exp)),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(6),
-                                    decoration: BoxDecoration(
-                                      color: Colors.red.withOpacity(0.1),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(Icons.close,
-                                        size: 16, color: Colors.red),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.work_outline,
+                                  color: Color(0xFF4CAF50), size: 20),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                  child: Text(exp,
+                                      style: const TextStyle(fontSize: 14))),
+                              GestureDetector(
+                                onTap: () =>
+                                    setState(() => experiencias.remove(exp)),
+                                child: Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red.withOpacity(0.1),
+                                    shape: BoxShape.circle,
                                   ),
+                                  child: const Icon(Icons.close,
+                                      size: 16, color: Colors.red),
                                 ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      const SizedBox(height: 30),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 58,
-                        child: ElevatedButton.icon(
-                          onPressed: salvarDados,
-                          icon: const Icon(Icons.save_alt),
-                          label: const Text('SALVAR PERFIL',
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold)),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF4CAF50),
-                            foregroundColor: Colors.white,
-                            elevation: 6,
-                            shadowColor:
-                                const Color(0xFF4CAF50).withOpacity(0.4),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(18)),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    const SizedBox(height: 30),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 58,
+                      child: ElevatedButton.icon(
+                        onPressed: salvarDados,
+                        icon: const Icon(Icons.save_alt),
+                        label: const Text('SALVAR PERFIL',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF4CAF50),
+                          foregroundColor: Colors.white,
+                          elevation: 6,
+                          shadowColor:
+                              const Color(0xFF4CAF50).withOpacity(0.4),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(18)),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildAvaliacoesPerfil() {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.star, color: Colors.amber, size: 20),
+              const SizedBox(width: 8),
+              const Text(
+                'Minhas Avaliações',
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF2C3E50)),
+              ),
+              const Spacer(),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.amber.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.star, color: Colors.amber, size: 14),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${_mediaAvaliacoes.toStringAsFixed(1)} (${_avaliacoes.length})',
+                      style: const TextStyle(
+                          color: Colors.amber,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          // Barra de média
+          Row(
+            children: List.generate(
+              5,
+              (i) => Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: Icon(
+                  i < _mediaAvaliacoes.round()
+                      ? Icons.star
+                      : Icons.star_border,
+                  color: Colors.amber,
+                  size: 22,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          ..._avaliacoes.take(2).map((a) => Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[50],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(a.nomeAvaliador,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 13)),
+                          const Spacer(),
+                          ...List.generate(
+                            5,
+                            (i) => Icon(
+                              i < a.nota ? Icons.star : Icons.star_border,
+                              color: Colors.amber,
+                              size: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (a.comentario.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(a.comentario,
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.grey[700])),
+                      ],
+                    ],
+                  ),
+                ),
+              )),
+        ],
       ),
     );
   }
