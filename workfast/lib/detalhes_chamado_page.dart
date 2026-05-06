@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:workfast/chamado_model.dart';
 import 'package:workfast/avaliacao_service.dart';
-import 'package:workfast/avaliacao_page.dart';
-import 'package:workfast/pagamento_page.dart';
+import 'package:workfast/notificacao_service.dart';
 
 class DetalhesChamadoPage extends StatefulWidget {
   final Chamado chamado;
@@ -49,6 +48,18 @@ class _DetalhesChamadoPageState extends State<DetalhesChamadoPage> {
     widget.chamado.status = StatusNegociacao.propostaEnviada;
     widget.chamado.valorFinal = valor;
     widget.chamado.save();
+
+    // Cria notificação imediatamente ao enviar a proposta
+    NotificacaoService.adicionarNotificacao(Notificacao(
+      titulo: 'Nova Proposta Recebida 💼',
+      mensagem:
+          'Um profissional enviou uma proposta de R\$ ${valor.toStringAsFixed(2)} para o chamado "${widget.chamado.nome}".',
+      data: DateTime.now(),
+      tipo: 'solicitacao',
+      nomeProfissional: widget.chamado.nome,
+      especializacoes: [widget.chamado.categoria.name],
+      chamadoNome: widget.chamado.descricao,
+    ));
 
     setState(() {
       _status = StatusNegociacao.propostaEnviada;

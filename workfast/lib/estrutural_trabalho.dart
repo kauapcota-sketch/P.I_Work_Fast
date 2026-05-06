@@ -7,13 +7,16 @@ class EstruturalTrabalho extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final estruturalChamados =
         ChamadoService.getChamadosPorCategoria(CategoriaChamado.estrutural);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF2C3E50),
+      backgroundColor:
+          isDarkMode ? const Color(0xFF1B2836) : const Color(0xFF2C3E50),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF2C3E50),
+        backgroundColor:
+            isDarkMode ? const Color(0xFF1B2836) : const Color(0xFF2C3E50),
         elevation: 0,
         title: const Text(
           'Chamados Estruturais',

@@ -55,7 +55,6 @@ class _PerfilPageState extends State<PerfilPage> {
       if (await file.exists()) imagem = file;
     }
 
-    // Carrega avaliações do perfil do usuário logado
     final nomePerfil = nomeController.text;
     if (nomePerfil.isNotEmpty) {
       _avaliacoes = AvaliacaoService.getAvaliacoesDoProfissional(nomePerfil);
@@ -136,9 +135,7 @@ class _PerfilPageState extends State<PerfilPage> {
             onPressed: () {
               final t = ctrl.text.trim();
               if (t.isNotEmpty) {
-                setState(() {
-                  experiencias.add(t);
-                });
+                setState(() => experiencias.add(t));
                 salvarDados();
                 Navigator.pop(context);
               }
@@ -152,19 +149,30 @@ class _PerfilPageState extends State<PerfilPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    final scaffoldBg =
+        isDarkMode ? const Color(0xFF1B2836) : const Color(0xFFECEFF1);
+    final cardBg = isDarkMode ? const Color(0xFF2C3E50) : Colors.white;
+    final textoPrimario = isDarkMode ? Colors.white : const Color(0xFF2C3E50);
+    final textoSecundario = isDarkMode ? Colors.white70 : Colors.grey.shade700;
+
     if (isLoading) {
-      return const Scaffold(
-        backgroundColor: Color(0xFF2C3E50),
-        body: Center(child: CircularProgressIndicator(color: Colors.white)),
+      return Scaffold(
+        backgroundColor: scaffoldBg,
+        body: const Center(
+            child: CircularProgressIndicator(color: Color(0xFF4CAF50))),
       );
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFF2C3E50),
+      backgroundColor: scaffoldBg,
       body: SafeArea(
         child: Column(
           children: [
-            Padding(
+            // Header - sempre fundo escuro para manter o branco legível
+            Container(
+              color: const Color(0xFF2C3E50),
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               child: Row(
                 children: [
@@ -214,7 +222,7 @@ class _PerfilPageState extends State<PerfilPage> {
                       children: [
                         CircleAvatar(
                           radius: 50,
-                          backgroundColor: Colors.white,
+                          backgroundColor: scaffoldBg,
                           child: CircleAvatar(
                             radius: 46,
                             backgroundColor: Colors.blueAccent,
@@ -251,35 +259,38 @@ class _PerfilPageState extends State<PerfilPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Avaliações no topo do perfil
                     if (_avaliacoes.isNotEmpty) ...[
-                      _buildAvaliacoesPerfil(),
+                      _buildAvaliacoesPerfil(
+                          cardBg, textoPrimario, textoSecundario),
                       const SizedBox(height: 24),
                     ],
-                    _secaoTitulo('Informações Pessoais'),
+                    _secaoTitulo('Informações Pessoais', textoPrimario),
                     const SizedBox(height: 14),
                     _card([
                       _campoTexto(
                         controller: nomeController,
                         label: 'Nome completo',
                         icon: Icons.person_outline,
+                        isDarkMode: isDarkMode,
                       ),
                       const SizedBox(height: 14),
                       _campoTexto(
                         controller: descricaoController,
                         label: 'Sobre você',
                         icon: Icons.info_outline,
+                        isDarkMode: isDarkMode,
                         maxLines: 3,
                       ),
-                    ]),
+                    ], cardBg),
                     const SizedBox(height: 24),
-                    _secaoTitulo('Contato'),
+                    _secaoTitulo('Contato', textoPrimario),
                     const SizedBox(height: 14),
                     _card([
                       _campoTexto(
                         controller: telefoneController,
                         label: 'Telefone',
                         icon: Icons.phone_outlined,
+                        isDarkMode: isDarkMode,
                         tipo: TextInputType.phone,
                       ),
                       const SizedBox(height: 14),
@@ -287,14 +298,15 @@ class _PerfilPageState extends State<PerfilPage> {
                         controller: emailController,
                         label: 'Email',
                         icon: Icons.email_outlined,
+                        isDarkMode: isDarkMode,
                         tipo: TextInputType.emailAddress,
                       ),
-                    ]),
+                    ], cardBg),
                     const SizedBox(height: 24),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _secaoTitulo('Experiências'),
+                        _secaoTitulo('Experiências', textoPrimario),
                         GestureDetector(
                           onTap: adicionarExperiencia,
                           child: Container(
@@ -325,17 +337,22 @@ class _PerfilPageState extends State<PerfilPage> {
                         width: double.infinity,
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: cardBg,
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        child: const Column(
+                        child: Column(
                           children: [
                             Icon(Icons.work_outline,
-                                size: 36, color: Colors.grey),
-                            SizedBox(height: 8),
+                                size: 36,
+                                color:
+                                    isDarkMode ? Colors.white38 : Colors.grey),
+                            const SizedBox(height: 8),
                             Text('Nenhuma experiência adicionada.',
                                 style: TextStyle(
-                                    color: Colors.grey, fontSize: 14)),
+                                    color: isDarkMode
+                                        ? Colors.white54
+                                        : Colors.grey,
+                                    fontSize: 14)),
                           ],
                         ),
                       )
@@ -346,7 +363,7 @@ class _PerfilPageState extends State<PerfilPage> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 14),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: cardBg,
                             borderRadius: BorderRadius.circular(14),
                             boxShadow: [
                               BoxShadow(
@@ -363,7 +380,8 @@ class _PerfilPageState extends State<PerfilPage> {
                               const SizedBox(width: 12),
                               Expanded(
                                   child: Text(exp,
-                                      style: const TextStyle(fontSize: 14))),
+                                      style: TextStyle(
+                                          fontSize: 14, color: textoPrimario))),
                               GestureDetector(
                                 onTap: () =>
                                     setState(() => experiencias.remove(exp)),
@@ -411,11 +429,12 @@ class _PerfilPageState extends State<PerfilPage> {
     );
   }
 
-  Widget _buildAvaliacoesPerfil() {
+  Widget _buildAvaliacoesPerfil(
+      Color cardBg, Color textoPrimario, Color textoSecundario) {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardBg,
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
@@ -432,12 +451,12 @@ class _PerfilPageState extends State<PerfilPage> {
             children: [
               const Icon(Icons.star, color: Colors.amber, size: 20),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 'Minhas Avaliações',
                 style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF2C3E50)),
+                    color: textoPrimario),
               ),
               const Spacer(),
               Container(
@@ -464,7 +483,6 @@ class _PerfilPageState extends State<PerfilPage> {
             ],
           ),
           const SizedBox(height: 12),
-          // Barra de média
           Row(
             children: List.generate(
               5,
@@ -484,7 +502,7 @@ class _PerfilPageState extends State<PerfilPage> {
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.grey[50],
+                    color: Colors.grey.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
@@ -493,8 +511,10 @@ class _PerfilPageState extends State<PerfilPage> {
                       Row(
                         children: [
                           Text(a.nomeAvaliador,
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 13)),
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  color: textoPrimario)),
                           const Spacer(),
                           ...List.generate(
                             5,
@@ -510,7 +530,7 @@ class _PerfilPageState extends State<PerfilPage> {
                         const SizedBox(height: 4),
                         Text(a.comentario,
                             style: TextStyle(
-                                fontSize: 12, color: Colors.grey[700])),
+                                fontSize: 12, color: textoSecundario)),
                       ],
                     ],
                   ),
@@ -521,19 +541,19 @@ class _PerfilPageState extends State<PerfilPage> {
     );
   }
 
-  Widget _secaoTitulo(String texto) => Text(
+  Widget _secaoTitulo(String texto, Color cor) => Text(
         texto,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.bold,
-          color: Color(0xFF2C3E50),
+          color: cor,
         ),
       );
 
-  Widget _card(List<Widget> filhos) => Container(
+  Widget _card(List<Widget> filhos, Color cardBg) => Container(
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: cardBg,
           borderRadius: BorderRadius.circular(18),
           boxShadow: [
             BoxShadow(
@@ -553,6 +573,7 @@ class _PerfilPageState extends State<PerfilPage> {
     required TextEditingController controller,
     required String label,
     required IconData icon,
+    required bool isDarkMode,
     TextInputType tipo = TextInputType.text,
     int maxLines = 1,
   }) {
@@ -560,11 +581,16 @@ class _PerfilPageState extends State<PerfilPage> {
       controller: controller,
       keyboardType: tipo,
       maxLines: maxLines,
+      style: TextStyle(color: isDarkMode ? Colors.white : Colors.black87),
       decoration: InputDecoration(
         labelText: label,
+        labelStyle: TextStyle(
+            color: isDarkMode ? Colors.white60 : Colors.grey.shade700),
         prefixIcon: Icon(icon, color: const Color(0xFF4CAF50), size: 22),
         filled: true,
-        fillColor: const Color(0xFFF1F4F8),
+        fillColor: isDarkMode
+            ? Colors.white.withOpacity(0.07)
+            : const Color(0xFFF1F4F8),
         contentPadding:
             const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         border: OutlineInputBorder(

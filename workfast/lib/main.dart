@@ -12,9 +12,7 @@ import 'package:workfast/avaliacao_service.dart';
 import 'package:workfast/notificacao_service.dart';
 import 'package:workfast/pagamento_service.dart';
 import 'package:workfast/politicas_page.dart';
-import 'package:workfast/avaliacao_page.dart';
 import 'package:workfast/notificacoes_page.dart';
-import 'package:workfast/pagamento_page.dart';
 
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
 

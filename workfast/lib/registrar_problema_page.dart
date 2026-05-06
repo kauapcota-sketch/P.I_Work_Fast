@@ -99,14 +99,13 @@ class _RegistrarProblemaPageState extends State<RegistrarProblemaPage> {
         categorias.firstWhere((c) => c['nome'] == categoriaEscolhida)['valor']
             as CategoriaChamado;
 
-    // CORREÇÃO: Usando imagemPath em vez de imagem
     await ChamadoService.adicionarChamado(Chamado(
       nome: nome,
       descricao: descricao,
       telefone: telefone,
       email: email,
       categoria: categoriaSelecionada,
-      imagemPath: imagemSelecionada?.path, // Passando o caminho do arquivo
+      imagemPath: imagemSelecionada?.path,
     ));
 
     mostrarSnack('Problema registrado com sucesso!');
@@ -127,8 +126,20 @@ class _RegistrarProblemaPageState extends State<RegistrarProblemaPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    // Cores adaptadas
+    final scaffoldBg =
+        isDarkMode ? const Color(0xFF1B2836) : const Color(0xFFECEFF1);
+    final cardBg = isDarkMode ? const Color(0xFF2C3E50) : Colors.white;
+    final textoPrimario = isDarkMode ? Colors.white : const Color(0xFF2C3E50);
+    final textoInput = isDarkMode ? Colors.white : Colors.black87;
+    final fillColor =
+        isDarkMode ? Colors.white.withOpacity(0.07) : Colors.grey.shade50;
+    final borderColor = isDarkMode ? Colors.white24 : Colors.grey.shade300;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF2C3E50),
+      backgroundColor: scaffoldBg,
       appBar: AppBar(
         title: const Text('Registrar Problema',
             style: TextStyle(fontWeight: FontWeight.bold)),
@@ -145,7 +156,7 @@ class _RegistrarProblemaPageState extends State<RegistrarProblemaPage> {
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: cardBg,
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
@@ -158,11 +169,12 @@ class _RegistrarProblemaPageState extends State<RegistrarProblemaPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ── Foto do problema ──────────────────────────────
+              // Foto do problema
               GestureDetector(
                 onTap: () => showModalBottomSheet(
                   context: context,
-                  backgroundColor: Colors.grey[100],
+                  backgroundColor:
+                      isDarkMode ? const Color(0xFF2C3E50) : Colors.grey[100],
                   shape: const RoundedRectangleBorder(
                     borderRadius:
                         BorderRadius.vertical(top: Radius.circular(20)),
@@ -173,7 +185,8 @@ class _RegistrarProblemaPageState extends State<RegistrarProblemaPage> {
                         ListTile(
                           leading: const Icon(Icons.camera_alt,
                               color: Color(0xFF4CAF50)),
-                          title: const Text('Tirar foto'),
+                          title: Text('Tirar foto',
+                              style: TextStyle(color: textoPrimario)),
                           onTap: () {
                             Navigator.pop(context);
                             selecionarImagem(ImageSource.camera);
@@ -182,7 +195,8 @@ class _RegistrarProblemaPageState extends State<RegistrarProblemaPage> {
                         ListTile(
                           leading: const Icon(Icons.photo_library,
                               color: Color(0xFF4CAF50)),
-                          title: const Text('Escolher da galeria'),
+                          title: Text('Escolher da galeria',
+                              style: TextStyle(color: textoPrimario)),
                           onTap: () {
                             Navigator.pop(context);
                             selecionarImagem(ImageSource.gallery);
@@ -196,24 +210,29 @@ class _RegistrarProblemaPageState extends State<RegistrarProblemaPage> {
                   width: double.infinity,
                   height: 160,
                   decoration: BoxDecoration(
-                    color: Colors.grey[50],
+                    color: fillColor,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: imagemSelecionada != null
                           ? const Color(0xFF4CAF50)
-                          : Colors.grey.withOpacity(0.4),
+                          : borderColor,
                       width: 2,
                     ),
                   ),
                   child: imagemSelecionada == null
-                      ? const Column(
+                      ? Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(Icons.add_a_photo,
-                                size: 48, color: Colors.grey),
-                            SizedBox(height: 8),
+                                size: 48,
+                                color:
+                                    isDarkMode ? Colors.white38 : Colors.grey),
+                            const SizedBox(height: 8),
                             Text('Toque para adicionar foto (opcional)',
-                                style: TextStyle(color: Colors.grey)),
+                                style: TextStyle(
+                                    color: isDarkMode
+                                        ? Colors.white54
+                                        : Colors.grey)),
                           ],
                         )
                       : Stack(
@@ -247,50 +266,65 @@ class _RegistrarProblemaPageState extends State<RegistrarProblemaPage> {
               ),
               const SizedBox(height: 24),
 
-              // ── Nome ─────────────────────────────────────────
-              _label('Seu nome'),
+              _label('Seu nome', textoPrimario),
               const SizedBox(height: 10),
               _campo(nomeController, 'Ex: João Silva', Icons.person_outline,
-                  tipo: TextInputType.name),
+                  tipo: TextInputType.name,
+                  textoInput: textoInput,
+                  fillColor: fillColor,
+                  borderColor: borderColor),
               const SizedBox(height: 20),
 
-              // ── Descrição ─────────────────────────────────────
-              _label('Descrição do problema'),
+              _label('Descrição do problema', textoPrimario),
               const SizedBox(height: 10),
               TextField(
                 controller: descricaoController,
                 maxLines: 4,
                 textCapitalization: TextCapitalization.sentences,
+                style: TextStyle(color: textoInput),
                 decoration: InputDecoration(
                   hintText: 'Descreva detalhadamente o problema...',
+                  hintStyle: TextStyle(
+                      color: isDarkMode ? Colors.white38 : Colors.grey),
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: borderColor)),
+                  enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: borderColor)),
+                  focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide:
+                          const BorderSide(color: Color(0xFF4CAF50), width: 2)),
                   filled: true,
-                  fillColor: Colors.grey[50],
+                  fillColor: fillColor,
                 ),
               ),
               const SizedBox(height: 20),
 
-              // ── Categoria ─────────────────────────────────────
-              _label('Categoria'),
+              _label('Categoria', textoPrimario),
               const SizedBox(height: 10),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey[300]!),
+                  color: fillColor,
+                  border: Border.all(color: borderColor),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
                     isExpanded: true,
                     value: categoriaEscolhida,
+                    dropdownColor: cardBg,
+                    style: TextStyle(color: textoInput, fontSize: 14),
                     items: categorias.map((cat) {
                       return DropdownMenuItem<String>(
                         value: cat['nome'] as String,
                         child: Row(children: [
                           Text(cat['emoji'] as String),
                           const SizedBox(width: 8),
-                          Text(cat['nome'] as String),
+                          Text(cat['nome'] as String,
+                              style: TextStyle(color: textoInput)),
                         ]),
                       );
                     }).toList(),
@@ -302,22 +336,25 @@ class _RegistrarProblemaPageState extends State<RegistrarProblemaPage> {
               ),
               const SizedBox(height: 20),
 
-              // ── Telefone ──────────────────────────────────────
-              _label('Telefone de contato'),
+              _label('Telefone de contato', textoPrimario),
               const SizedBox(height: 10),
               _campo(
                   telefoneController, '(11) 99999-9999', Icons.phone_outlined,
-                  tipo: TextInputType.phone),
+                  tipo: TextInputType.phone,
+                  textoInput: textoInput,
+                  fillColor: fillColor,
+                  borderColor: borderColor),
               const SizedBox(height: 20),
 
-              // ── Email ─────────────────────────────────────────
-              _label('E-mail de contato'),
+              _label('E-mail de contato', textoPrimario),
               const SizedBox(height: 10),
               _campo(emailController, 'seu@email.com', Icons.email_outlined,
-                  tipo: TextInputType.emailAddress),
+                  tipo: TextInputType.emailAddress,
+                  textoInput: textoInput,
+                  fillColor: fillColor,
+                  borderColor: borderColor),
               const SizedBox(height: 30),
 
-              // ── Botão Enviar ──────────────────────────────────
               SizedBox(
                 width: double.infinity,
                 height: 55,
@@ -342,25 +379,41 @@ class _RegistrarProblemaPageState extends State<RegistrarProblemaPage> {
     );
   }
 
-  Widget _label(String texto) {
+  Widget _label(String texto, Color cor) {
     return Text(
       texto,
-      style: const TextStyle(
-          fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF2C3E50)),
+      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: cor),
     );
   }
 
-  Widget _campo(TextEditingController controller, String hint, IconData icon,
-      {TextInputType tipo = TextInputType.text}) {
+  Widget _campo(
+    TextEditingController controller,
+    String hint,
+    IconData icon, {
+    TextInputType tipo = TextInputType.text,
+    required Color textoInput,
+    required Color fillColor,
+    required Color borderColor,
+  }) {
     return TextField(
       controller: controller,
       keyboardType: tipo,
+      style: TextStyle(color: textoInput),
       decoration: InputDecoration(
         hintText: hint,
+        hintStyle: TextStyle(color: textoInput.withOpacity(0.4)),
         prefixIcon: Icon(icon, color: const Color(0xFF4CAF50)),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: borderColor)),
+        enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: borderColor)),
+        focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFF4CAF50), width: 2)),
         filled: true,
-        fillColor: Colors.grey[50],
+        fillColor: fillColor,
       ),
     );
   }
