@@ -35,8 +35,16 @@ class _CadastroPageState extends State<CadastroPage> {
 
     setState(() => _errorMessage = null);
 
-    if (username.isEmpty || email.isEmpty || password.isEmpty) {
+    if (username.isEmpty ||
+        email.isEmpty ||
+        password.isEmpty ||
+        confirmPassword.isEmpty) {
       setState(() => _errorMessage = 'Por favor, preencha todos os campos');
+      return;
+    }
+
+    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
+      setState(() => _errorMessage = 'Por favor, insira um e-mail válido');
       return;
     }
 

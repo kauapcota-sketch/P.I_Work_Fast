@@ -50,7 +50,6 @@ class _PagamentoPageState extends State<PagamentoPage> {
     await Future.delayed(const Duration(seconds: 2));
     await PagamentoService.confirmarPagamento(_pagamento!);
 
-    // Notificação de pagamento confirmado
     await NotificacaoService.adicionarNotificacao(Notificacao(
       titulo: 'Pagamento Confirmado! ✅',
       mensagem:
@@ -72,10 +71,14 @@ class _PagamentoPageState extends State<PagamentoPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final bgColor =
+        isDarkMode ? const Color(0xFF1B2836) : const Color(0xFF2C3E50);
+
     return Scaffold(
-      backgroundColor: const Color(0xFF2C3E50),
+      backgroundColor: bgColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF2C3E50),
+        backgroundColor: Colors.transparent,
         elevation: 0,
         title: const Text('Pagamento Seguro',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
@@ -85,20 +88,19 @@ class _PagamentoPageState extends State<PagamentoPage> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: _pagamentoConfirmado
-            ? _buildPagamentoConfirmado()
-            : _buildQrCode(),
+            ? _buildPagamentoConfirmado(isDarkMode)
+            : _buildQrCode(isDarkMode),
       ),
     );
   }
 
-  Widget _buildQrCode() {
+  Widget _buildQrCode(bool isDarkMode) {
     return Column(
       children: [
-        // Info do serviço
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isDarkMode ? const Color(0xFF2C3E50) : Colors.white,
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
@@ -109,7 +111,9 @@ class _PagamentoPageState extends State<PagamentoPage> {
           ),
           child: Column(
             children: [
-              const Icon(Icons.qr_code_2, size: 80, color: Color(0xFF2C3E50)),
+              Icon(Icons.qr_code_2,
+                  size: 80,
+                  color: isDarkMode ? Colors.white : const Color(0xFF2C3E50)),
               const SizedBox(height: 16),
               Text(
                 'R\$ ${widget.valor.toStringAsFixed(2)}',
@@ -121,10 +125,10 @@ class _PagamentoPageState extends State<PagamentoPage> {
               const SizedBox(height: 8),
               Text(
                 'Serviço: ${widget.chamadoNome}',
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF2C3E50)),
+                    color: isDarkMode ? Colors.white : const Color(0xFF2C3E50)),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 4),
@@ -133,25 +137,27 @@ class _PagamentoPageState extends State<PagamentoPage> {
                 style: const TextStyle(fontSize: 14, color: Colors.grey),
               ),
               const SizedBox(height: 20),
-
-              // QR Code simulado
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFF2C3E50), width: 3),
+                  border: Border.all(
+                      color:
+                          isDarkMode ? Colors.white24 : const Color(0xFF2C3E50),
+                      width: 3),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: CustomPaint(
                   size: const Size(180, 180),
-                  painter: _QrCodePainter(),
+                  painter: _QrCodePainter(isDarkMode: isDarkMode),
                 ),
               ),
-
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.grey[50],
+                  color: isDarkMode
+                      ? Colors.white.withOpacity(0.05)
+                      : Colors.grey[50],
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Row(
@@ -170,10 +176,7 @@ class _PagamentoPageState extends State<PagamentoPage> {
             ],
           ),
         ),
-
         const SizedBox(height: 20),
-
-        // Aviso de segurança
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -194,9 +197,7 @@ class _PagamentoPageState extends State<PagamentoPage> {
             ],
           ),
         ),
-
         const SizedBox(height: 24),
-
         SizedBox(
           width: double.infinity,
           height: 58,
@@ -232,13 +233,13 @@ class _PagamentoPageState extends State<PagamentoPage> {
     );
   }
 
-  Widget _buildPagamentoConfirmado() {
+  Widget _buildPagamentoConfirmado(bool isDarkMode) {
     return Column(
       children: [
         Container(
           padding: const EdgeInsets.all(30),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isDarkMode ? const Color(0xFF2C3E50) : Colors.white,
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
@@ -259,12 +260,12 @@ class _PagamentoPageState extends State<PagamentoPage> {
                     size: 64, color: Color(0xFF4CAF50)),
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 'Pagamento Confirmado!',
                 style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF2C3E50)),
+                    color: isDarkMode ? Colors.white : const Color(0xFF2C3E50)),
               ),
               const SizedBox(height: 8),
               Text(
@@ -274,143 +275,97 @@ class _PagamentoPageState extends State<PagamentoPage> {
               const SizedBox(height: 24),
               const Divider(),
               const SizedBox(height: 16),
-              const Align(
+              Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'Dados do Serviço',
                   style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF2C3E50)),
+                      color:
+                          isDarkMode ? Colors.white : const Color(0xFF2C3E50)),
                 ),
               ),
               const SizedBox(height: 12),
-              _buildInfoRow(
-                  Icons.person, 'Profissional', widget.nomeProfissional),
-              const SizedBox(height: 10),
-              _buildInfoRow(Icons.work, 'Serviço', widget.chamadoNome),
+              _buildInfoRow(Icons.person, 'Profissional',
+                  widget.nomeProfissional, isDarkMode),
               const SizedBox(height: 10),
               _buildInfoRow(
-                  Icons.phone, 'Seu contato (enviado)', widget.contatoCliente),
+                  Icons.work, 'Serviço', widget.chamadoNome, isDarkMode),
+              const SizedBox(height: 10),
+              _buildInfoRow(Icons.phone, 'Seu contato (enviado)',
+                  widget.contatoCliente, isDarkMode),
               const SizedBox(height: 10),
               _buildInfoRow(Icons.location_on, 'Local do serviço',
-                  widget.localServico),
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.info_outline, color: Colors.blue, size: 18),
-                    SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'O profissional recebeu seus dados de contato e endereço. Aguarde o contato dele!',
-                        style: TextStyle(fontSize: 12, color: Colors.black87),
-                      ),
-                    ),
-                  ],
+                  widget.localServico, isDarkMode),
+              const SizedBox(height: 30),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2C3E50),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15)),
+                  ),
+                  child: const Text('VOLTAR AO INÍCIO',
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
-          ),
-        ),
-        const SizedBox(height: 24),
-        SizedBox(
-          width: double.infinity,
-          height: 58,
-          child: ElevatedButton(
-            onPressed: () =>
-                Navigator.popUntil(context, ModalRoute.withName('/home')),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2C3E50),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20)),
-            ),
-            child: const Text('VOLTAR AO INÍCIO',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String label, String valor) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: const Color(0xFF4CAF50), size: 20),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(label,
-                  style: const TextStyle(fontSize: 11, color: Colors.grey)),
-              Text(valor,
-                  style: const TextStyle(
-                      fontSize: 14, fontWeight: FontWeight.w600)),
-            ],
+  Widget _buildInfoRow(
+      IconData icon, String label, String value, bool isDarkMode) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: Colors.grey),
+        const SizedBox(width: 10),
+        Expanded(
+          child: RichText(
+            text: TextSpan(
+              style: TextStyle(
+                  fontSize: 14,
+                  color: isDarkMode ? Colors.white70 : Colors.black87),
+              children: [
+                TextSpan(
+                    text: '$label: ',
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                TextSpan(text: value),
+              ],
+            ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
 
-// Painter para QR Code visual simulado
 class _QrCodePainter extends CustomPainter {
+  final bool isDarkMode;
+  _QrCodePainter({required this.isDarkMode});
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFF2C3E50)
+      ..color = isDarkMode ? Colors.white : const Color(0xFF2C3E50)
+      ..strokeWidth = 2
       ..style = PaintingStyle.fill;
 
-    final cellSize = size.width / 21;
-
-    // Padrão simulado de QR code
-    final pattern = [
-      [1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1],
-      [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1],
-      [1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1],
-      [1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 0, 1],
-      [1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1],
-      [1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1],
-      [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-      [1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1],
-      [0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0],
-      [1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1],
-      [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
-      [1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1],
-      [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0],
-      [1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0],
-      [1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1],
-      [1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0],
-      [1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1],
-      [1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0],
-      [1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1],
-    ];
-
-    for (int row = 0; row < pattern.length; row++) {
-      for (int col = 0; col < pattern[row].length; col++) {
-        if (pattern[row][col] == 1) {
+    // Desenha um QR Code simulado com quadradinhos
+    double cellSize = size.width / 10;
+    for (int i = 0; i < 10; i++) {
+      for (int j = 0; j < 10; j++) {
+        if ((i + j) % 2 == 0 || (i == 0 || i == 9 || j == 0 || j == 9)) {
           canvas.drawRect(
             Rect.fromLTWH(
-              col * cellSize,
-              row * cellSize,
-              cellSize,
-              cellSize,
-            ),
+                i * cellSize, j * cellSize, cellSize - 2, cellSize - 2),
             paint,
           );
         }

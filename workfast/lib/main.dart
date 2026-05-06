@@ -16,32 +16,28 @@ import 'package:workfast/avaliacao_page.dart';
 import 'package:workfast/notificacoes_page.dart';
 import 'package:workfast/pagamento_page.dart';
 
-// Gerenciador de Tema Global
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
 
 void main() async {
-  // Garante que os bindings do Flutter estejam prontos
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    // 1. Inicializa o Hive
     await Hive.initFlutter();
 
-    // 2. Registra os Adapters Manuais
-    Hive.registerAdapter(CategoriaChamadoAdapter());
-    Hive.registerAdapter(ChamadoAdapter());
-    Hive.registerAdapter(AvaliacaoAdapter());
-    Hive.registerAdapter(NotificacaoAdapter());
-    Hive.registerAdapter(PagamentoAdapter());
+    // ✅ Sem duplicatas - cada adapter registrado UMA vez
+    Hive.registerAdapter(CategoriaChamadoAdapter()); // typeId: 0
+    Hive.registerAdapter(ChamadoAdapter()); // typeId: 1
+    Hive.registerAdapter(StatusNegociacaoAdapter()); // typeId: 2
+    Hive.registerAdapter(AvaliacaoAdapter()); // typeId: (verifique)
+    Hive.registerAdapter(NotificacaoAdapter()); // typeId: 3
+    Hive.registerAdapter(PagamentoAdapter()); // typeId: (verifique)
 
-    // 3. Abre os boxes necessários
     await AuthService.init();
     await ChamadoService.init();
     await AvaliacaoService.init();
     await NotificacaoService.init();
     await PagamentoService.init();
 
-    // Abre box de configurações e perfil
     if (!Hive.isBoxOpen('perfil')) {
       await Hive.openBox('perfil');
     }
@@ -49,7 +45,6 @@ void main() async {
       await Hive.openBox('configuracoes');
     }
 
-    // Simula notificações de demonstração se não houver nenhuma
     if (NotificacaoService.todas.isEmpty) {
       await NotificacaoService.simularSolicitacao(
         nomeProfissional: 'Carlos Eletricista',

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 // --- ENUM CATEGORIA ---
@@ -9,6 +10,14 @@ enum CategoriaChamado {
   estrutural,
 }
 
+// --- ENUM STATUS NEGOCIACAO ---
+enum StatusNegociacao {
+  aberto,
+  propostaEnviada,
+  aceito,
+  recusado,
+}
+
 // --- CLASSE CHAMADO ---
 class Chamado extends HiveObject {
   final String nome;
@@ -17,6 +26,8 @@ class Chamado extends HiveObject {
   final String email;
   final CategoriaChamado categoria;
   final String? imagemPath;
+  StatusNegociacao status;
+  double? valorFinal;
 
   Chamado({
     required this.nome,
@@ -25,12 +36,14 @@ class Chamado extends HiveObject {
     required this.email,
     this.categoria = CategoriaChamado.geral,
     this.imagemPath,
+    this.status = StatusNegociacao.aberto,
+    this.valorFinal,
   });
 
   File? get imagem => imagemPath != null ? File(imagemPath!) : null;
 }
 
-// --- ADAPTER MANUAL PARA CATEGORIA (Resolve o erro no main.dart) ---
+// --- ADAPTER MANUAL PARA CATEGORIA ---
 class CategoriaChamadoAdapter extends TypeAdapter<CategoriaChamado> {
   @override
   final int typeId = 0;
@@ -46,7 +59,23 @@ class CategoriaChamadoAdapter extends TypeAdapter<CategoriaChamado> {
   }
 }
 
-// --- ADAPTER MANUAL PARA CHAMADO (Resolve o erro no main.dart) ---
+// --- ADAPTER MANUAL PARA STATUS NEGOCIACAO ---
+class StatusNegociacaoAdapter extends TypeAdapter<StatusNegociacao> {
+  @override
+  final int typeId = 2;
+
+  @override
+  StatusNegociacao read(BinaryReader reader) {
+    return StatusNegociacao.values[reader.readInt()];
+  }
+
+  @override
+  void write(BinaryWriter writer, StatusNegociacao obj) {
+    writer.writeInt(obj.index);
+  }
+}
+
+// --- ADAPTER MANUAL PARA CHAMADO ---
 class ChamadoAdapter extends TypeAdapter<Chamado> {
   @override
   final int typeId = 1;
@@ -60,6 +89,8 @@ class ChamadoAdapter extends TypeAdapter<Chamado> {
       email: reader.readString(),
       categoria: CategoriaChamado.values[reader.readInt()],
       imagemPath: reader.readString(),
+      status: StatusNegociacao.values[reader.readInt()],
+      valorFinal: reader.readDouble(),
     );
   }
 
@@ -71,23 +102,30 @@ class ChamadoAdapter extends TypeAdapter<Chamado> {
     writer.writeString(obj.email);
     writer.writeInt(obj.categoria.index);
     writer.writeString(obj.imagemPath ?? '');
+    writer.writeInt(obj.status.index);
+    writer.writeDouble(obj.valorFinal ?? 0.0);
   }
 }
 
 // --- SERVIÇO DE CHAMADOS ---
 class ChamadoService {
   static late Box<Chamado> _chamadosBox;
+  static Box<Chamado> get chamadosBox => _chamadosBox;
 
   static Future<void> init() async {
-    // Abre o box usando o Adapter manual
-    _chamadosBox = await Hive.openBox<Chamado>('chamadosBox');
+    debugPrint("ChamadoService: Inicializando...");
+    _chamadosBox = await Hive.openBox<Chamado>("chamadosBox");
+    debugPrint(
+        "ChamadoService: Box 'chamadosBox' aberto. Contém ${_chamadosBox.length} chamados.");
 
     if (_chamadosBox.isEmpty) {
+      debugPrint("ChamadoService: Box vazio, adicionando dados mockados.");
       _addMockData();
     }
   }
 
   static void _addMockData() {
+    debugPrint("ChamadoService: Adicionando dados mockados...");
     final mockData = [
       Chamado(
         nome: 'Paulo Henrique',
@@ -116,20 +154,35 @@ class ChamadoService {
 
   static Future<void> adicionarChamado(Chamado chamado) async {
     await _chamadosBox.add(chamado);
+    debugPrint("ChamadoService: Chamado adicionado: ${chamado.nome}");
   }
 
   static List<Chamado> getChamadosPorCategoria(CategoriaChamado categoria) {
+    debugPrint("ChamadoService: Filtrando chamados por categoria: $categoria");
+    List<Chamado> resultados;
     if (categoria == CategoriaChamado.geral) {
-      return _chamadosBox.values.toList().reversed.toList();
+      resultados = _chamadosBox.values.toList().reversed.toList();
     } else {
-      return _chamadosBox.values
+      resultados = _chamadosBox.values
           .where((c) => c.categoria == categoria)
           .toList()
           .reversed
           .toList();
     }
+    debugPrint(
+        "ChamadoService: Encontrados ${resultados.length} chamados para $categoria.");
+    return resultados;
   }
 
-  static List<Chamado> get todosChamados =>
-      _chamadosBox.values.toList().reversed.toList();
+  static List<Chamado> get todosChamados {
+    debugPrint("ChamadoService: Acessando todos os chamados.");
+    return _chamadosBox.values.toList().reversed.toList();
+  }
+
+  static Future<void> clearAllChamados() async {
+    debugPrint("ChamadoService: Limpando todos os chamados.");
+    await _chamadosBox.clear();
+    _addMockData();
+    debugPrint("ChamadoService: Chamados limpos e mock data adicionada.");
+  }
 }

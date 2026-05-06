@@ -334,8 +334,8 @@ class _PerfilPageState extends State<PerfilPage> {
                                 size: 36, color: Colors.grey),
                             SizedBox(height: 8),
                             Text('Nenhuma experiência adicionada.',
-                                style:
-                                    TextStyle(color: Colors.grey, fontSize: 14)),
+                                style: TextStyle(
+                                    color: Colors.grey, fontSize: 14)),
                           ],
                         ),
                       )
@@ -395,8 +395,7 @@ class _PerfilPageState extends State<PerfilPage> {
                           backgroundColor: const Color(0xFF4CAF50),
                           foregroundColor: Colors.white,
                           elevation: 6,
-                          shadowColor:
-                              const Color(0xFF4CAF50).withOpacity(0.4),
+                          shadowColor: const Color(0xFF4CAF50).withOpacity(0.4),
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(18)),
                         ),
@@ -472,9 +471,7 @@ class _PerfilPageState extends State<PerfilPage> {
               (i) => Padding(
                 padding: const EdgeInsets.only(right: 4),
                 child: Icon(
-                  i < _mediaAvaliacoes.round()
-                      ? Icons.star
-                      : Icons.star_border,
+                  i < _mediaAvaliacoes.round() ? Icons.star : Icons.star_border,
                   color: Colors.amber,
                   size: 22,
                 ),

@@ -37,7 +37,7 @@ class Notificacao extends HiveObject {
   final String titulo;
   final String mensagem;
   final DateTime data;
-  final String tipo; // 'solicitacao', 'pagamento', 'concluido', 'avaliacao'
+  final String tipo;
   bool lida;
   final String nomeProfissional;
   final String? fotoProfissional;
@@ -64,18 +64,18 @@ class NotificacaoService {
     _box = await Hive.openBox<Notificacao>('notificacoesBox');
   }
 
+  static Box<Notificacao> get notificacoesBox => _box;
+
   static Future<void> adicionarNotificacao(Notificacao notificacao) async {
     await _box.add(notificacao);
   }
 
-  static List<Notificacao> get todas =>
-      _box.values.toList().reversed.toList();
+  static List<Notificacao> get todas => _box.values.toList().reversed.toList();
 
   static List<Notificacao> get naoLidas =>
       _box.values.where((n) => !n.lida).toList();
 
-  static int get quantidadeNaoLidas =>
-      _box.values.where((n) => !n.lida).length;
+  static int get quantidadeNaoLidas => _box.values.where((n) => !n.lida).length;
 
   static Future<void> marcarComoLida(Notificacao n) async {
     n.lida = true;
@@ -89,7 +89,6 @@ class NotificacaoService {
     }
   }
 
-  // Simula uma notificação de solicitação de profissional
   static Future<void> simularSolicitacao({
     required String nomeProfissional,
     required List<String> especializacoes,

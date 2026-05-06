@@ -73,8 +73,8 @@ class _PoliticasPageState extends State<PoliticasPage> {
                                 fontWeight: FontWeight.w900,
                                 letterSpacing: 1)),
                         Text('Termos e Políticas',
-                            style: TextStyle(
-                                color: Colors.white70, fontSize: 12)),
+                            style:
+                                TextStyle(color: Colors.white70, fontSize: 12)),
                       ],
                     ),
                   ],
@@ -197,7 +197,8 @@ class _PoliticasPageState extends State<PoliticasPage> {
                               Container(
                                 padding: const EdgeInsets.all(16),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF4CAF50).withOpacity(0.1),
+                                  color:
+                                      const Color(0xFF4CAF50).withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(16),
                                   border: Border.all(
                                       color: const Color(0xFF4CAF50)
@@ -248,9 +249,7 @@ class _PoliticasPageState extends State<PoliticasPage> {
                           borderRadius: BorderRadius.circular(20)),
                     ),
                     child: Text(
-                      _leuTudo
-                          ? 'LI E ACEITO OS TERMOS'
-                          : 'ROLE PARA LER TUDO',
+                      _leuTudo ? 'LI E ACEITO OS TERMOS' : 'ROLE PARA LER TUDO',
                       style: const TextStyle(
                           fontSize: 16, fontWeight: FontWeight.bold),
                     ),

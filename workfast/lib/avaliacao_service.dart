@@ -3,7 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 // Adapter para Avaliacao
 class AvaliacaoAdapter extends TypeAdapter<Avaliacao> {
   @override
-  final int typeId = 2;
+  final int typeId = 5;
 
   @override
   Avaliacao read(BinaryReader reader) {

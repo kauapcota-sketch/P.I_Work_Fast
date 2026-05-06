@@ -87,7 +87,11 @@ class _RegistrarProblemaPageState extends State<RegistrarProblemaPage> {
       return;
     }
     if (email.isEmpty) {
-      mostrarSnack('Informe um email.', erro: true);
+      mostrarSnack("Informe um email.", erro: true);
+      return;
+    }
+    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+$').hasMatch(email)) {
+      mostrarSnack("Por favor, insira um e-mail válido.", erro: true);
       return;
     }
 

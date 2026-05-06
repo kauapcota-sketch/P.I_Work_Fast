@@ -46,20 +46,29 @@ class _LoginPageState extends State<LoginPage> {
 
     setState(() => _isLoading = true);
 
-    // Pequeno delay para feedback visual
-    await Future.delayed(const Duration(milliseconds: 800));
+    try {
+      // Pequeno delay para feedback visual
+      await Future.delayed(const Duration(milliseconds: 800));
 
-    // VERIFICA OS DADOS NO HIVE (Bando de dados local)
-    final loginValido = AuthService.verificarLogin(email, password);
+      // VERIFICA OS DADOS NO HIVE (Bando de dados local)
+      final loginValido = AuthService.verificarLogin(email, password);
 
-    setState(() => _isLoading = false);
-
-    if (loginValido) {
       if (mounted) {
-        Navigator.pushReplacementNamed(context, '/home');
+        setState(() => _isLoading = false);
+
+        if (loginValido) {
+          Navigator.pushReplacementNamed(context, '/home');
+        } else {
+          setState(() => _errorMessage = 'E-mail ou senha incorretos');
+        }
       }
-    } else {
-      setState(() => _errorMessage = 'E-mail ou senha incorretos');
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorMessage = 'Erro ao realizar login: $e';
+        });
+      }
     }
   }
 

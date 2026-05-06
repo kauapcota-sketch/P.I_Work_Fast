@@ -4,7 +4,7 @@ enum StatusPagamento { pendente, aguardandoPagamento, pago, concluido }
 
 class PagamentoAdapter extends TypeAdapter<Pagamento> {
   @override
-  final int typeId = 4;
+  final int typeId = 6;
 
   @override
   Pagamento read(BinaryReader reader) {
@@ -93,8 +93,7 @@ class PagamentoService {
     await p.save();
   }
 
-  static List<Pagamento> get todos =>
-      _box.values.toList().reversed.toList();
+  static List<Pagamento> get todos => _box.values.toList().reversed.toList();
 
   static List<Pagamento> getPorStatus(StatusPagamento status) =>
       _box.values.where((p) => p.status == status).toList();
