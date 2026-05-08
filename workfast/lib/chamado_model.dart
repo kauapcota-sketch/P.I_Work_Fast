@@ -110,17 +110,37 @@ class ChamadoAdapter extends TypeAdapter<Chamado> {
 // --- SERVIÇO DE CHAMADOS ---
 class ChamadoService {
   static late Box<Chamado> _chamadosBox;
-  static Box<Chamado> get chamadosBox => _chamadosBox;
+  static bool _isInitialized = false;
+  
+  static Box<Chamado> get chamadosBox {
+    if (!_isInitialized) {
+      throw Exception('ChamadoService não foi inicializado. Chame ChamadoService.init() antes de usar.');
+    }
+    return _chamadosBox;
+  }
+  
+  static bool get isInitialized => _isInitialized;
 
   static Future<void> init() async {
-    debugPrint("ChamadoService: Inicializando...");
-    _chamadosBox = await Hive.openBox<Chamado>("chamadosBox");
-    debugPrint(
-        "ChamadoService: Box 'chamadosBox' aberto. Contém ${_chamadosBox.length} chamados.");
+    if (_isInitialized) {
+      debugPrint("ChamadoService: Já foi inicializado, pulando...");
+      return;
+    }
+    
+    try {
+      debugPrint("ChamadoService: Inicializando...");
+      _chamadosBox = await Hive.openBox<Chamado>("chamadosBox");
+      _isInitialized = true;
+      debugPrint(
+          "ChamadoService: Box 'chamadosBox' aberto. Contém ${_chamadosBox.length} chamados.");
 
-    if (_chamadosBox.isEmpty) {
-      debugPrint("ChamadoService: Box vazio, adicionando dados mockados.");
-      _addMockData();
+      if (_chamadosBox.isEmpty) {
+        debugPrint("ChamadoService: Box vazio, adicionando dados mockados.");
+        _addMockData();
+      }
+    } catch (e) {
+      debugPrint("ChamadoService: Erro na inicialização: $e");
+      rethrow;
     }
   }
 
@@ -158,6 +178,11 @@ class ChamadoService {
   }
 
   static List<Chamado> getChamadosPorCategoria(CategoriaChamado categoria) {
+    if (!_isInitialized) {
+      debugPrint("ChamadoService: Aviso - Serviço não inicializado, retornando lista vazia");
+      return [];
+    }
+    
     debugPrint("ChamadoService: Filtrando chamados por categoria: $categoria");
     List<Chamado> resultados;
     if (categoria == CategoriaChamado.geral) {
@@ -175,6 +200,10 @@ class ChamadoService {
   }
 
   static List<Chamado> get todosChamados {
+    if (!_isInitialized) {
+      debugPrint("ChamadoService: Aviso - Serviço não inicializado, retornando lista vazia");
+      return [];
+    }
     debugPrint("ChamadoService: Acessando todos os chamados.");
     return _chamadosBox.values.toList().reversed.toList();
   }

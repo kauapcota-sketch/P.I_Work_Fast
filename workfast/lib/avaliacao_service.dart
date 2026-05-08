@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 // Adapter para Avaliacao
@@ -44,16 +45,40 @@ class Avaliacao extends HiveObject {
 
 class AvaliacaoService {
   static late Box<Avaliacao> _box;
+  static bool _isInitialized = false;
+
+  static bool get isInitialized => _isInitialized;
 
   static Future<void> init() async {
-    _box = await Hive.openBox<Avaliacao>('avaliacoesBox');
+    if (_isInitialized) {
+      debugPrint("AvaliacaoService: Já foi inicializado, pulando...");
+      return;
+    }
+
+    try {
+      debugPrint("AvaliacaoService: Inicializando...");
+      _box = await Hive.openBox<Avaliacao>('avaliacoesBox');
+      _isInitialized = true;
+      debugPrint("AvaliacaoService: Box 'avaliacoesBox' aberto com sucesso.");
+    } catch (e) {
+      debugPrint("AvaliacaoService: Erro na inicialização: $e");
+      rethrow;
+    }
   }
 
   static Future<void> adicionarAvaliacao(Avaliacao avaliacao) async {
+    if (!_isInitialized) {
+      debugPrint("AvaliacaoService: Aviso - Serviço não inicializado");
+      return;
+    }
     await _box.add(avaliacao);
   }
 
   static List<Avaliacao> getAvaliacoesDoProfissional(String nomeProfissional) {
+    if (!_isInitialized) {
+      debugPrint("AvaliacaoService: Aviso - Serviço não inicializado, retornando lista vazia");
+      return [];
+    }
     return _box.values
         .where((a) => a.nomeProfissional == nomeProfissional)
         .toList()
@@ -68,6 +93,11 @@ class AvaliacaoService {
     return soma / avaliacoes.length;
   }
 
-  static List<Avaliacao> get todasAvaliacoes =>
-      _box.values.toList().reversed.toList();
+  static List<Avaliacao> get todasAvaliacoes {
+    if (!_isInitialized) {
+      debugPrint("AvaliacaoService: Aviso - Serviço não inicializado, retornando lista vazia");
+      return [];
+    }
+    return _box.values.toList().reversed.toList();
+  }
 }

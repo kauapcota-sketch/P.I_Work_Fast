@@ -59,6 +59,7 @@ class _DetalhesChamadoPageState extends State<DetalhesChamadoPage> {
       nomeProfissional: widget.chamado.nome,
       especializacoes: [widget.chamado.categoria.name],
       chamadoNome: widget.chamado.descricao,
+      valorProposta: valor,
     ));
 
     setState(() {
@@ -71,6 +72,17 @@ class _DetalhesChamadoPageState extends State<DetalhesChamadoPage> {
       SnackBar(
           content:
               Text('Proposta de R\$ ${valor.toStringAsFixed(2)} enviada!')),
+    );
+  }
+
+  void _refazerProposta() {
+    _propostaController.clear();
+    setState(() {
+      _status = StatusNegociacao.aberto;
+      _valorFinal = null;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Você pode enviar uma nova proposta.')),
     );
   }
 
@@ -329,25 +341,93 @@ class _DetalhesChamadoPageState extends State<DetalhesChamadoPage> {
                         ] else if (_status ==
                             StatusNegociacao.propostaEnviada) ...[
                           Container(
-                            padding: const EdgeInsets.all(15),
+                            padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
                               color: Colors.amber.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(15),
-                              border: Border.all(color: Colors.amber),
+                              border: Border.all(color: Colors.amber, width: 2),
                             ),
-                            child: Row(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Icon(Icons.hourglass_empty,
-                                    color: Colors.amber),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Text(
-                                    'Proposta de R\$ ${_valorFinal?.toStringAsFixed(2)} enviada. Aguardando cliente.',
-                                    style: TextStyle(
-                                        color: isDarkMode
-                                            ? Colors.white
-                                            : Colors.black87,
-                                        fontWeight: FontWeight.bold),
+                                Row(
+                                  children: [
+                                    const Icon(Icons.hourglass_empty,
+                                        color: Colors.amber, size: 24),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        'Proposta Enviada',
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            color: isDarkMode
+                                                ? Colors.white
+                                                : Colors.black87,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 15),
+                                Container(
+                                  padding: const EdgeInsets.all(15),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Valor da Proposta:',
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            color: isDarkMode
+                                                ? Colors.white70
+                                                : Colors.grey[700],
+                                            fontWeight: FontWeight.w500),
+                                      ),
+                                      Text(
+                                        'R\$ ${_valorFinal?.toStringAsFixed(2)}',
+                                        style: const TextStyle(
+                                            fontSize: 20,
+                                            color: Colors.green,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'Aguardando resposta do cliente...',
+                                  style: TextStyle(
+                                      fontSize: 13,
+                                      color: isDarkMode
+                                          ? Colors.white54
+                                          : Colors.grey[600],
+                                      fontStyle: FontStyle.italic),
+                                ),
+                                const SizedBox(height: 15),
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 45,
+                                  child: OutlinedButton(
+                                    onPressed: _refazerProposta,
+                                    style: OutlinedButton.styleFrom(
+                                      side: const BorderSide(
+                                          color: Colors.amber, width: 2),
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12)),
+                                    ),
+                                    child: const Text(
+                                      'REFAZER PROPOSTA',
+                                      style: TextStyle(
+                                          color: Colors.amber,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14),
+                                    ),
                                   ),
                                 ),
                               ],

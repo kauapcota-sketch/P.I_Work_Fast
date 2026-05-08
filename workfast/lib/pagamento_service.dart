@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 enum StatusPagamento { pendente, aguardandoPagamento, pago, concluido }
@@ -57,9 +58,25 @@ class Pagamento extends HiveObject {
 
 class PagamentoService {
   static late Box<Pagamento> _box;
+  static bool _isInitialized = false;
+
+  static bool get isInitialized => _isInitialized;
 
   static Future<void> init() async {
-    _box = await Hive.openBox<Pagamento>('pagamentosBox');
+    if (_isInitialized) {
+      debugPrint("PagamentoService: Já foi inicializado, pulando...");
+      return;
+    }
+
+    try {
+      debugPrint("PagamentoService: Inicializando...");
+      _box = await Hive.openBox<Pagamento>('pagamentosBox');
+      _isInitialized = true;
+      debugPrint("PagamentoService: Box 'pagamentosBox' aberto com sucesso.");
+    } catch (e) {
+      debugPrint("PagamentoService: Erro na inicialização: $e");
+      rethrow;
+    }
   }
 
   static Future<Pagamento> criarPagamento({
@@ -69,6 +86,11 @@ class PagamentoService {
     required String contatoCliente,
     required String localServico,
   }) async {
+    if (!_isInitialized) {
+      debugPrint("PagamentoService: Aviso - Serviço não inicializado");
+      throw Exception('PagamentoService não foi inicializado');
+    }
+
     final pagamento = Pagamento(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       chamadoNome: chamadoNome,
@@ -84,17 +106,36 @@ class PagamentoService {
   }
 
   static Future<void> confirmarPagamento(Pagamento p) async {
+    if (!_isInitialized) {
+      debugPrint("PagamentoService: Aviso - Serviço não inicializado");
+      return;
+    }
     p.status = StatusPagamento.pago;
     await p.save();
   }
 
   static Future<void> marcarComoConcluido(Pagamento p) async {
+    if (!_isInitialized) {
+      debugPrint("PagamentoService: Aviso - Serviço não inicializado");
+      return;
+    }
     p.status = StatusPagamento.concluido;
     await p.save();
   }
 
-  static List<Pagamento> get todos => _box.values.toList().reversed.toList();
+  static List<Pagamento> get todos {
+    if (!_isInitialized) {
+      debugPrint("PagamentoService: Aviso - Serviço não inicializado, retornando lista vazia");
+      return [];
+    }
+    return _box.values.toList().reversed.toList();
+  }
 
-  static List<Pagamento> getPorStatus(StatusPagamento status) =>
-      _box.values.where((p) => p.status == status).toList();
+  static List<Pagamento> getPorStatus(StatusPagamento status) {
+    if (!_isInitialized) {
+      debugPrint("PagamentoService: Aviso - Serviço não inicializado, retornando lista vazia");
+      return [];
+    }
+    return _box.values.where((p) => p.status == status).toList();
+  }
 }

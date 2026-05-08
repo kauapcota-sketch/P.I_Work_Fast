@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class NotificacaoAdapter extends TypeAdapter<Notificacao> {
@@ -16,6 +17,7 @@ class NotificacaoAdapter extends TypeAdapter<Notificacao> {
       fotoProfissional: reader.readString(),
       especializacoes: List<String>.from(reader.readStringList()),
       chamadoNome: reader.readString(),
+      valorProposta: reader.readDouble(),
     );
   }
 
@@ -30,6 +32,7 @@ class NotificacaoAdapter extends TypeAdapter<Notificacao> {
     writer.writeString(obj.fotoProfissional ?? '');
     writer.writeStringList(obj.especializacoes);
     writer.writeString(obj.chamadoNome);
+    writer.writeDouble(obj.valorProposta);
   }
 }
 
@@ -43,6 +46,7 @@ class Notificacao extends HiveObject {
   final String? fotoProfissional;
   final List<String> especializacoes;
   final String chamadoNome;
+  final double valorProposta;
 
   Notificacao({
     required this.titulo,
@@ -54,35 +58,94 @@ class Notificacao extends HiveObject {
     this.fotoProfissional,
     required this.especializacoes,
     required this.chamadoNome,
+    this.valorProposta = 0.0,
   });
 }
 
 class NotificacaoService {
   static late Box<Notificacao> _box;
+  static bool _isInitialized = false;
+
+  static bool get isInitialized => _isInitialized;
 
   static Future<void> init() async {
-    _box = await Hive.openBox<Notificacao>('notificacoesBox');
+    if (_isInitialized) {
+      debugPrint("NotificacaoService: Já foi inicializado, pulando...");
+      return;
+    }
+
+    try {
+      debugPrint("NotificacaoService: Inicializando...");
+      _box = await Hive.openBox<Notificacao>('notificacoesBox');
+      _isInitialized = true;
+      debugPrint("NotificacaoService: Box 'notificacoesBox' aberto com sucesso.");
+    } catch (e) {
+      debugPrint("NotificacaoService: Erro na inicialização: $e");
+      rethrow;
+    }
   }
 
-  static Box<Notificacao> get notificacoesBox => _box;
+  static Box<Notificacao> get notificacoesBox {
+    if (!_isInitialized) {
+      throw Exception('NotificacaoService não foi inicializado. Chame NotificacaoService.init() antes de usar.');
+    }
+    return _box;
+  }
 
   static Future<void> adicionarNotificacao(Notificacao notificacao) async {
+    if (!_isInitialized) {
+      debugPrint("NotificacaoService: Aviso - Serviço não inicializado");
+      return;
+    }
     await _box.add(notificacao);
   }
 
-  static List<Notificacao> get todas => _box.values.toList().reversed.toList();
+  static Future<void> removerNotificacao(Notificacao notificacao) async {
+    if (!_isInitialized) {
+      debugPrint("NotificacaoService: Aviso - Serviço não inicializado");
+      return;
+    }
+    await notificacao.delete();
+  }
 
-  static List<Notificacao> get naoLidas =>
-      _box.values.where((n) => !n.lida).toList();
+  static List<Notificacao> get todas {
+    if (!_isInitialized) {
+      debugPrint("NotificacaoService: Aviso - Serviço não inicializado, retornando lista vazia");
+      return [];
+    }
+    return _box.values.toList().reversed.toList();
+  }
 
-  static int get quantidadeNaoLidas => _box.values.where((n) => !n.lida).length;
+  static List<Notificacao> get naoLidas {
+    if (!_isInitialized) {
+      debugPrint("NotificacaoService: Aviso - Serviço não inicializado, retornando lista vazia");
+      return [];
+    }
+    return _box.values.where((n) => !n.lida).toList();
+  }
+
+  static int get quantidadeNaoLidas {
+    if (!_isInitialized) {
+      debugPrint("NotificacaoService: Aviso - Serviço não inicializado");
+      return 0;
+    }
+    return _box.values.where((n) => !n.lida).length;
+  }
 
   static Future<void> marcarComoLida(Notificacao n) async {
+    if (!_isInitialized) {
+      debugPrint("NotificacaoService: Aviso - Serviço não inicializado");
+      return;
+    }
     n.lida = true;
     await n.save();
   }
 
   static Future<void> marcarTodasComoLidas() async {
+    if (!_isInitialized) {
+      debugPrint("NotificacaoService: Aviso - Serviço não inicializado");
+      return;
+    }
     for (var n in _box.values) {
       n.lida = true;
       await n.save();
@@ -93,7 +156,12 @@ class NotificacaoService {
     required String nomeProfissional,
     required List<String> especializacoes,
     required String chamadoNome,
+    double valorProposta = 0.0,
   }) async {
+    if (!_isInitialized) {
+      debugPrint("NotificacaoService: Aviso - Serviço não inicializado");
+      return;
+    }
     await adicionarNotificacao(Notificacao(
       titulo: 'Nova Solicitação de Serviço',
       mensagem: '$nomeProfissional quer realizar seu chamado "$chamadoNome"',
@@ -102,6 +170,7 @@ class NotificacaoService {
       nomeProfissional: nomeProfissional,
       especializacoes: especializacoes,
       chamadoNome: chamadoNome,
+      valorProposta: valorProposta,
     ));
   }
 }

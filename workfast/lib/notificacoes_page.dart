@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:workfast/notificacao_service.dart';
 import 'package:workfast/pagamento_page.dart';
+import 'package:workfast/chamado_model.dart';
 
 class NotificacoesPage extends StatefulWidget {
   const NotificacoesPage({super.key});
@@ -81,6 +82,7 @@ class _NotificacoesPageState extends State<NotificacoesPage> {
                         MaterialPageRoute(
                           builder: (_) => PerfilProfissionalModal(
                             notificacao: n,
+                            onNotificacaoRemovida: _carregar,
                           ),
                         ),
                       );
@@ -224,8 +226,13 @@ class _NotificacaoCard extends StatelessWidget {
 
 class PerfilProfissionalModal extends StatefulWidget {
   final Notificacao notificacao;
+  final VoidCallback? onNotificacaoRemovida;
 
-  const PerfilProfissionalModal({super.key, required this.notificacao});
+  const PerfilProfissionalModal({
+    super.key,
+    required this.notificacao,
+    this.onNotificacaoRemovida,
+  });
 
   @override
   State<PerfilProfissionalModal> createState() =>
@@ -233,6 +240,24 @@ class PerfilProfissionalModal extends StatefulWidget {
 }
 
 class _PerfilProfissionalModalState extends State<PerfilProfissionalModal> {
+  Future<void> _recusarProposta() async {
+    // Remove a notificação
+    await NotificacaoService.removerNotificacao(widget.notificacao);
+    
+    // Chama callback para atualizar a lista
+    widget.onNotificacaoRemovida?.call();
+    
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Proposta recusada e removida das notificações.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      Navigator.pop(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final n = widget.notificacao;
@@ -315,12 +340,50 @@ class _PerfilProfissionalModalState extends State<PerfilProfissionalModal> {
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.grey),
                   ),
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 20),
+                  // Exibição do valor proposto
+                  if (n.valorProposta > 0) ...[
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.green.withOpacity(0.5),
+                          width: 1.5,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Valor Proposto:',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: isDarkMode
+                                  ? Colors.white70
+                                  : Colors.grey[700],
+                            ),
+                          ),
+                          Text(
+                            'R\$ ${n.valorProposta.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
                   Row(
                     children: [
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: () => Navigator.pop(context),
+                          onPressed: _recusarProposta,
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 15),
                             side: const BorderSide(color: Colors.red),
