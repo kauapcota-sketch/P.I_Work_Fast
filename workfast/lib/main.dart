@@ -37,7 +37,7 @@ void main() async {
     // Abre as boxes de configuração
     if (!Hive.isBoxOpen('perfil')) await Hive.openBox('perfil');
     if (!Hive.isBoxOpen('configuracoes')) await Hive.openBox('configuracoes');
-    
+
     debugPrint('main: Hive inicializado e adapters registrados');
   } catch (e) {
     debugPrint('Erro na inicialização do Hive: $e');

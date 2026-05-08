@@ -50,6 +50,7 @@ class _PagamentoPageState extends State<PagamentoPage> {
     await Future.delayed(const Duration(seconds: 2));
     await PagamentoService.confirmarPagamento(_pagamento!);
 
+    // CORREÇÃO: Garantir que a notificação de pagamento use o valor correto e seja do tipo 'pagamento'
     await NotificacaoService.adicionarNotificacao(Notificacao(
       titulo: 'Pagamento Confirmado! ✅',
       mensagem:
@@ -59,6 +60,7 @@ class _PagamentoPageState extends State<PagamentoPage> {
       nomeProfissional: widget.nomeProfissional,
       especializacoes: [],
       chamadoNome: widget.chamadoNome,
+      valorProposta: widget.valor, // Importante: salvar o valor na notificação
     ));
 
     if (mounted) {

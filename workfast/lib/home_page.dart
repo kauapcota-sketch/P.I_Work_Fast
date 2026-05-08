@@ -45,11 +45,12 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     final selectedCategory = categories[_selectedCategoryIndex];
-    
+
     // Verifica se o serviço foi inicializado
     if (!ChamadoService.isInitialized) {
       return Scaffold(
-        backgroundColor: isDarkMode ? const Color(0xFF1B2836) : const Color(0xFFECEFF1),
+        backgroundColor:
+            isDarkMode ? const Color(0xFF1B2836) : const Color(0xFFECEFF1),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -67,17 +68,20 @@ class _HomePageState extends State<HomePage> {
         ),
       );
     }
-    
-    final chamados = ChamadoService.getChamadosPorCategoria(selectedCategory.category);
+
+    final chamados =
+        ChamadoService.getChamadosPorCategoria(selectedCategory.category);
 
     return Scaffold(
-      backgroundColor: isDarkMode ? const Color(0xFF1B2836) : const Color(0xFFECEFF1),
+      backgroundColor:
+          isDarkMode ? const Color(0xFF1B2836) : const Color(0xFFECEFF1),
       appBar: AppBar(
         backgroundColor: const Color(0xFF2C3E50),
         elevation: 0,
         title: const Text(
           'WorkFast',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24),
+          style: TextStyle(
+              color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24),
         ),
         centerTitle: true,
         actions: [
@@ -95,241 +99,326 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Banner com saudação
-            Container(
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF4CAF50), Color(0xFF8BC34A)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 5),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Bem-vindo ao WorkFast!',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+      // CORREÇÃO 3: Melhorar responsividade com LayoutBuilder
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Banner com saudação - Responsivo
+                Container(
+                  margin: EdgeInsets.all(constraints.maxWidth * 0.04),
+                  padding: EdgeInsets.all(constraints.maxWidth * 0.05),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF4CAF50), Color(0xFF8BC34A)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Encontre serviços profissionais de qualidade',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.white.withOpacity(0.9),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Título da seção
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-              child: Text(
-                'Categorias de Serviços',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: isDarkMode ? Colors.white : const Color(0xFF2C3E50),
-                ),
-              ),
-            ),
-
-            // Carrossel de categorias
-            SizedBox(
-              height: 100,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: categories.length,
-                itemBuilder: (context, index) {
-                  final category = categories[index];
-                  final isSelected = index == _selectedCategoryIndex;
-
-                  return GestureDetector(
-                    onTap: () => setState(() => _selectedCategoryIndex = index),
-                    child: Container(
-                      margin: const EdgeInsets.only(right: 12),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? category.color.withOpacity(0.9)
-                            : (isDarkMode
-                                ? Colors.white.withOpacity(0.1)
-                                : Colors.white),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: isSelected
-                              ? category.color
-                              : Colors.transparent,
-                          width: 2,
-                        ),
-                        boxShadow: isSelected
-                            ? [
-                                BoxShadow(
-                                  color: category.color.withOpacity(0.3),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ]
-                            : [],
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
                       ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            category.icon,
-                            color: isSelected ? Colors.white : category.color,
-                            size: 32,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            category.name,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: isSelected
-                                  ? Colors.white
-                                  : (isDarkMode ? Colors.white : Colors.black87),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Título dos chamados
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Chamados ${selectedCategory.name}',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: isDarkMode ? Colors.white : const Color(0xFF2C3E50),
-                    ),
+                    ],
                   ),
-                  if (chamados.isNotEmpty)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: selectedCategory.color.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        '${chamados.length}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: selectedCategory.color,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-
-            // Lista de chamados
-            if (chamados.isEmpty)
-              Padding(
-                padding: const EdgeInsets.all(32),
-                child: Center(
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        Icons.inbox,
-                        size: 64,
-                        color: Colors.grey.withOpacity(0.5),
-                      ),
-                      const SizedBox(height: 16),
                       Text(
-                        'Nenhum chamado encontrado',
+                        'Bem-vindo ao WorkFast!',
                         style: TextStyle(
-                          fontSize: 16,
-                          color: isDarkMode ? Colors.white70 : Colors.grey.shade600,
+                          fontSize: _getResponsiveFontSize(constraints, 22),
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Encontre serviços profissionais de qualidade',
+                        style: TextStyle(
+                          fontSize: _getResponsiveFontSize(constraints, 14),
+                          color: Colors.white.withOpacity(0.9),
                         ),
                       ),
                     ],
                   ),
                 ),
-              )
-            else
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: chamados.length,
-                itemBuilder: (context, index) {
-                  final chamado = chamados[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: _buildChamadoCard(context, chamado, selectedCategory.color, isDarkMode),
-                  );
-                },
-              ),
 
-            const SizedBox(height: 24),
-
-            // Botão para registrar problema
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              child: SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton.icon(
-                  onPressed: () => Navigator.pushNamed(context, '/registrar_problema'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF4CAF50),
-                    foregroundColor: Colors.white,
-                    elevation: 8,
-                    shadowColor: const Color(0xFF4CAF50).withOpacity(0.5),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
+                // Título da seção - Responsivo
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    constraints.maxWidth * 0.04,
+                    constraints.maxWidth * 0.02,
+                    constraints.maxWidth * 0.04,
+                    constraints.maxWidth * 0.03,
                   ),
-                  icon: const Icon(Icons.add_circle_outline),
-                  label: const Text(
-                    'Registrar Novo Problema',
+                  child: Text(
+                    'Categorias de Serviços',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: _getResponsiveFontSize(constraints, 18),
                       fontWeight: FontWeight.bold,
-                      letterSpacing: 0.5,
+                      color:
+                          isDarkMode ? Colors.white : const Color(0xFF2C3E50),
                     ),
                   ),
                 ),
-              ),
+
+                // Carrossel de categorias - Responsivo
+                SizedBox(
+                  height: _getResponsiveCategoryHeight(constraints),
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: constraints.maxWidth * 0.04,
+                    ),
+                    itemCount: categories.length,
+                    itemBuilder: (context, index) {
+                      final category = categories[index];
+                      final isSelected = index == _selectedCategoryIndex;
+
+                      return GestureDetector(
+                        onTap: () =>
+                            setState(() => _selectedCategoryIndex = index),
+                        child: Container(
+                          margin: EdgeInsets.only(
+                            right: constraints.maxWidth * 0.03,
+                          ),
+                          padding: EdgeInsets.all(
+                            constraints.maxWidth * 0.03,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? category.color.withOpacity(0.9)
+                                : (isDarkMode
+                                    ? Colors.white.withOpacity(0.1)
+                                    : Colors.white),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: isSelected
+                                  ? category.color
+                                  : Colors.transparent,
+                              width: 2,
+                            ),
+                            boxShadow: isSelected
+                                ? [
+                                    BoxShadow(
+                                      color: category.color.withOpacity(0.3),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ]
+                                : [],
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                category.icon,
+                                color:
+                                    isSelected ? Colors.white : category.color,
+                                size: _getResponsiveIconSize(constraints),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                category.name,
+                                style: TextStyle(
+                                  fontSize:
+                                      _getResponsiveFontSize(constraints, 12),
+                                  fontWeight: FontWeight.bold,
+                                  color: isSelected
+                                      ? Colors.white
+                                      : (isDarkMode
+                                          ? Colors.white
+                                          : Colors.black87),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                // Título dos chamados - Responsivo
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    constraints.maxWidth * 0.04,
+                    0,
+                    constraints.maxWidth * 0.04,
+                    constraints.maxWidth * 0.03,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'Chamados ${selectedCategory.name}',
+                          style: TextStyle(
+                            fontSize: _getResponsiveFontSize(constraints, 18),
+                            fontWeight: FontWeight.bold,
+                            color: isDarkMode
+                                ? Colors.white
+                                : const Color(0xFF2C3E50),
+                          ),
+                        ),
+                      ),
+                      if (chamados.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: selectedCategory.color.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${chamados.length}',
+                            style: TextStyle(
+                              fontSize: _getResponsiveFontSize(constraints, 14),
+                              fontWeight: FontWeight.bold,
+                              color: selectedCategory.color,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+
+                // Lista de chamados - Responsivo
+                if (chamados.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Center(
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.inbox,
+                            size: 64,
+                            color: Colors.grey.withOpacity(0.5),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Nenhum chamado encontrado',
+                            style: TextStyle(
+                              fontSize: _getResponsiveFontSize(constraints, 16),
+                              color: isDarkMode
+                                  ? Colors.white70
+                                  : Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                else
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: constraints.maxWidth * 0.04,
+                    ),
+                    child: Column(
+                      children: List.generate(
+                        chamados.length,
+                        (index) {
+                          final chamado = chamados[index];
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: _buildChamadoCard(
+                              context,
+                              chamado,
+                              selectedCategory.color,
+                              isDarkMode,
+                              constraints,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+
+                const SizedBox(height: 24),
+
+                // Botão para registrar problema - Responsivo
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: constraints.maxWidth * 0.04,
+                    vertical: constraints.maxWidth * 0.04,
+                  ),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: _getResponsiveButtonHeight(constraints),
+                    child: ElevatedButton.icon(
+                      onPressed: () =>
+                          Navigator.pushNamed(context, '/registrar_problema'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF4CAF50),
+                        foregroundColor: Colors.white,
+                        elevation: 8,
+                        shadowColor: const Color(0xFF4CAF50).withOpacity(0.5),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      icon: const Icon(Icons.add_circle_outline),
+                      label: Text(
+                        'Registrar Novo Problema',
+                        style: TextStyle(
+                          fontSize: _getResponsiveFontSize(constraints, 16),
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
+  }
+
+  // Funções auxiliares para responsividade
+  double _getResponsiveFontSize(BoxConstraints constraints, double baseSize) {
+    if (constraints.maxWidth < 400) {
+      return baseSize * 0.85;
+    } else if (constraints.maxWidth < 600) {
+      return baseSize * 0.95;
+    }
+    return baseSize;
+  }
+
+  double _getResponsiveIconSize(BoxConstraints constraints) {
+    if (constraints.maxWidth < 400) {
+      return 28;
+    } else if (constraints.maxWidth < 600) {
+      return 30;
+    }
+    return 32;
+  }
+
+  double _getResponsiveCategoryHeight(BoxConstraints constraints) {
+    if (constraints.maxWidth < 400) {
+      return 90;
+    } else if (constraints.maxWidth < 600) {
+      return 95;
+    }
+    return 100;
+  }
+
+  double _getResponsiveButtonHeight(BoxConstraints constraints) {
+    if (constraints.maxWidth < 400) {
+      return 48;
+    } else if (constraints.maxWidth < 600) {
+      return 52;
+    }
+    return 56;
   }
 
   Widget _buildChamadoCard(
@@ -337,6 +426,7 @@ class _HomePageState extends State<HomePage> {
     Chamado chamado,
     Color categoryColor,
     bool isDarkMode,
+    BoxConstraints constraints,
   ) {
     return GestureDetector(
       onTap: () {
@@ -348,11 +438,9 @@ class _HomePageState extends State<HomePage> {
         );
       },
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(constraints.maxWidth * 0.04),
         decoration: BoxDecoration(
-          color: isDarkMode
-              ? Colors.white.withOpacity(0.05)
-              : Colors.white,
+          color: isDarkMode ? Colors.white.withOpacity(0.05) : Colors.white,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isDarkMode
@@ -371,8 +459,8 @@ class _HomePageState extends State<HomePage> {
           children: [
             // Avatar com cor da categoria
             Container(
-              width: 56,
-              height: 56,
+              width: _getResponsiveAvatarSize(constraints),
+              height: _getResponsiveAvatarSize(constraints),
               decoration: BoxDecoration(
                 color: categoryColor.withOpacity(0.2),
                 shape: BoxShape.circle,
@@ -382,13 +470,13 @@ class _HomePageState extends State<HomePage> {
                   chamado.nome.isNotEmpty ? chamado.nome[0].toUpperCase() : '?',
                   style: TextStyle(
                     color: categoryColor,
-                    fontSize: 24,
+                    fontSize: _getResponsiveFontSize(constraints, 24),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: constraints.maxWidth * 0.04),
 
             // Informações do chamado
             Expanded(
@@ -398,9 +486,10 @@ class _HomePageState extends State<HomePage> {
                   Text(
                     chamado.nome,
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: _getResponsiveFontSize(constraints, 16),
                       fontWeight: FontWeight.bold,
-                      color: isDarkMode ? Colors.white : const Color(0xFF2C3E50),
+                      color:
+                          isDarkMode ? Colors.white : const Color(0xFF2C3E50),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -409,7 +498,7 @@ class _HomePageState extends State<HomePage> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: _getResponsiveFontSize(constraints, 13),
                       color: isDarkMode ? Colors.white70 : Colors.grey.shade600,
                     ),
                   ),
@@ -418,15 +507,22 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       Icon(
                         Icons.phone_outlined,
-                        size: 12,
-                        color: isDarkMode ? Colors.white54 : Colors.grey.shade500,
+                        size: _getResponsiveFontSize(constraints, 12),
+                        color:
+                            isDarkMode ? Colors.white54 : Colors.grey.shade500,
                       ),
                       const SizedBox(width: 4),
-                      Text(
-                        chamado.telefone,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: isDarkMode ? Colors.white54 : Colors.grey.shade500,
+                      Expanded(
+                        child: Text(
+                          chamado.telefone,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: _getResponsiveFontSize(constraints, 12),
+                            color: isDarkMode
+                                ? Colors.white54
+                                : Colors.grey.shade500,
+                          ),
                         ),
                       ),
                     ],
@@ -439,12 +535,21 @@ class _HomePageState extends State<HomePage> {
             Icon(
               Icons.arrow_forward_ios,
               color: isDarkMode ? Colors.white30 : Colors.grey.shade400,
-              size: 16,
+              size: _getResponsiveFontSize(constraints, 16),
             ),
           ],
         ),
       ),
     );
+  }
+
+  double _getResponsiveAvatarSize(BoxConstraints constraints) {
+    if (constraints.maxWidth < 400) {
+      return 48;
+    } else if (constraints.maxWidth < 600) {
+      return 52;
+    }
+    return 56;
   }
 }
 

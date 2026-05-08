@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:workfast/notificacao_service.dart';
 import 'package:workfast/pagamento_page.dart';
 import 'package:workfast/chamado_model.dart';
@@ -83,6 +84,16 @@ class _NotificacoesPageState extends State<NotificacoesPage> {
                           builder: (_) => PerfilProfissionalModal(
                             notificacao: n,
                             onNotificacaoRemovida: _carregar,
+                          ),
+                        ),
+                      );
+                    } else if (n.tipo == 'pagamento' && mounted) {
+                      // CORREÇÃO: Abrir modal com dados do trabalhador após pagamento
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => DetalhesTrabalhadorPagamentoModal(
+                            notificacao: n,
                           ),
                         ),
                       );
@@ -241,12 +252,8 @@ class PerfilProfissionalModal extends StatefulWidget {
 
 class _PerfilProfissionalModalState extends State<PerfilProfissionalModal> {
   Future<void> _recusarProposta() async {
-    // Remove a notificação
     await NotificacaoService.removerNotificacao(widget.notificacao);
-    
-    // Chama callback para atualizar a lista
     widget.onNotificacaoRemovida?.call();
-    
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -341,7 +348,6 @@ class _PerfilProfissionalModalState extends State<PerfilProfissionalModal> {
                     style: TextStyle(color: Colors.grey),
                   ),
                   const SizedBox(height: 20),
-                  // Exibição do valor proposto
                   if (n.valorProposta > 0) ...[
                     Container(
                       padding: const EdgeInsets.all(16),
@@ -400,12 +406,14 @@ class _PerfilProfissionalModalState extends State<PerfilProfissionalModal> {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () {
+                            // CORREÇÃO: Passar o valor exato da proposta para a tela de pagamento
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (_) => PagamentoPage(
                                   nomeProfissional: n.nomeProfissional,
                                   chamadoNome: n.chamadoNome,
+                                  valor: n.valorProposta,
                                 ),
                               ),
                             );
@@ -430,6 +438,271 @@ class _PerfilProfissionalModalState extends State<PerfilProfissionalModal> {
           ],
         ),
       ),
+    );
+  }
+}
+
+// CORREÇÃO: Novo modal para exibir informações do trabalhador e do pagamento concluído
+class DetalhesTrabalhadorPagamentoModal extends StatefulWidget {
+  final Notificacao notificacao;
+
+  const DetalhesTrabalhadorPagamentoModal({
+    super.key,
+    required this.notificacao,
+  });
+
+  @override
+  State<DetalhesTrabalhadorPagamentoModal> createState() =>
+      _DetalhesTrabalhadorPagamentoModalState();
+}
+
+class _DetalhesTrabalhadorPagamentoModalState
+    extends State<DetalhesTrabalhadorPagamentoModal> {
+  String telefone = 'Carregando...';
+  String email = 'Carregando...';
+  String descricao = 'Carregando...';
+  File? imagem;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarDadosTrabalhador();
+  }
+
+  Future<void> _carregarDadosTrabalhador() async {
+    try {
+      final box = await Hive.openBox('perfil');
+
+      // Busca os dados do trabalhador na box de perfil
+      // Nota: No seu app, o trabalhador é o próprio usuário do perfil
+      setState(() {
+        telefone = box.get('telefone', defaultValue: '(31) 99999-0000');
+        email = box.get('email', defaultValue: 'profissional@workfast.com');
+        descricao =
+            box.get('descricao', defaultValue: 'Profissional qualificado.');
+
+        final caminhoImagem = box.get('imagem') as String?;
+        if (caminhoImagem != null) {
+          imagem = File(caminhoImagem);
+        }
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() => isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final n = widget.notificacao;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    return Scaffold(
+      backgroundColor:
+          isDarkMode ? const Color(0xFF1B2836) : const Color(0xFF2C3E50),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text('Dados do Trabalhador',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: isDarkMode ? const Color(0xFF2C3E50) : Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  )
+                ],
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4CAF50).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.check_circle,
+                            color: Color(0xFF4CAF50), size: 20),
+                        SizedBox(width: 8),
+                        Text(
+                          'PAGAMENTO CONCLUÍDO',
+                          style: TextStyle(
+                            color: Color(0xFF4CAF50),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundColor: Colors.blue,
+                    backgroundImage: imagem != null ? FileImage(imagem!) : null,
+                    child: imagem == null
+                        ? Text(
+                            n.nomeProfissional.isNotEmpty
+                                ? n.nomeProfissional[0].toUpperCase()
+                                : '?',
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 36,
+                                fontWeight: FontWeight.bold),
+                          )
+                        : null,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    n.nomeProfissional,
+                    style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: isDarkMode
+                            ? Colors.white
+                            : const Color(0xFF2C3E50)),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Serviço: ${n.chamadoNome}',
+                    style: const TextStyle(color: Colors.grey, fontSize: 14),
+                  ),
+                  const Divider(height: 40),
+                  _buildInfoSection(
+                      'Informações de Contato',
+                      [
+                        _buildInfoRow(
+                            Icons.phone, 'Telefone', telefone, isDarkMode),
+                        const SizedBox(height: 12),
+                        _buildInfoRow(Icons.email, 'E-mail', email, isDarkMode),
+                      ],
+                      isDarkMode),
+                  const SizedBox(height: 24),
+                  _buildInfoSection(
+                      'Sobre o Profissional',
+                      [
+                        Text(
+                          descricao,
+                          style: TextStyle(
+                            color: isDarkMode ? Colors.white70 : Colors.black87,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                      isDarkMode),
+                  const SizedBox(height: 24),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Valor do Pagamento:',
+                          style: TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                        Text(
+                          'R\$ ${n.valorProposta.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2C3E50),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15)),
+                      ),
+                      child: const Text('VOLTAR',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoSection(
+      String title, List<Widget> children, bool isDarkMode) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: isDarkMode ? Colors.white : const Color(0xFF2C3E50),
+          ),
+        ),
+        const SizedBox(height: 12),
+        ...children,
+      ],
+    );
+  }
+
+  Widget _buildInfoRow(
+      IconData icon, String label, String value, bool isDarkMode) {
+    return Row(
+      children: [
+        Icon(icon, size: 18, color: Colors.blue),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(color: Colors.grey, fontSize: 11),
+              ),
+              Text(
+                value,
+                style: TextStyle(
+                  color: isDarkMode ? Colors.white : Colors.black87,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
