@@ -177,6 +177,20 @@ class ChamadoService {
     debugPrint("ChamadoService: Chamado adicionado: ${chamado.nome}");
   }
 
+  static Future<void> removerChamadoPorNomeEDescricao(String nome, String descricao) async {
+    if (!_isInitialized) return;
+    
+    final keysToDelete = _chamadosBox.keys.where((key) {
+      final c = _chamadosBox.get(key);
+      return c != null && c.nome == nome && c.descricao == descricao;
+    }).toList();
+
+    for (var key in keysToDelete) {
+      await _chamadosBox.delete(key);
+    }
+    debugPrint("ChamadoService: Chamados removidos para $nome");
+  }
+
   static List<Chamado> getChamadosPorCategoria(CategoriaChamado categoria) {
     if (!_isInitialized) {
       debugPrint("ChamadoService: Aviso - Serviço não inicializado, retornando lista vazia");

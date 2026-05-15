@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:workfast/pagamento_service.dart';
 import 'package:workfast/notificacao_service.dart';
+import 'package:workfast/chamado_model.dart';
 
 class PagamentoPage extends StatefulWidget {
   final String nomeProfissional;
@@ -49,6 +50,14 @@ class _PagamentoPageState extends State<PagamentoPage> {
     setState(() => _processando = true);
     await Future.delayed(const Duration(seconds: 2));
     await PagamentoService.confirmarPagamento(_pagamento!);
+
+    // Remover o serviço da tela inicial
+    await ChamadoService.removerChamadoPorNomeEDescricao(
+        widget.nomeProfissional, widget.chamadoNome);
+
+    // Remover a notificação de proposta
+    await NotificacaoService.removerNotificacaoProposta(
+        widget.nomeProfissional, widget.chamadoNome);
 
     // CORREÇÃO: Garantir que a notificação de pagamento use o valor correto e seja do tipo 'pagamento'
     await NotificacaoService.adicionarNotificacao(Notificacao(

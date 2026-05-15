@@ -56,7 +56,12 @@ class _LoginPageState extends State<LoginPage> {
       if (mounted) {
         setState(() => _isLoading = false);
 
-        if (loginValido) {
+      if (loginValido) {
+          // Salvar o nome do usuário no perfil
+          final username = AuthService.getLoggedUsername(email);
+          if (username != null) {
+            await AuthService.salvarNomeNoPerfil(username);
+          }
           Navigator.pushReplacementNamed(context, '/home');
         } else {
           setState(() => _errorMessage = 'E-mail ou senha incorretos');

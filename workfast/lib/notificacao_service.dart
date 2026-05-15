@@ -108,6 +108,23 @@ class NotificacaoService {
     await notificacao.delete();
   }
 
+  static Future<void> removerNotificacaoProposta(String nomeProfissional, String chamadoNome) async {
+    if (!_isInitialized) return;
+    
+    final keysToDelete = _box.keys.where((key) {
+      final n = _box.get(key);
+      return n != null && 
+             n.tipo == 'solicitacao' && 
+             n.nomeProfissional == nomeProfissional && 
+             n.chamadoNome == chamadoNome;
+    }).toList();
+
+    for (var key in keysToDelete) {
+      await _box.delete(key);
+    }
+    debugPrint("NotificacaoService: Notificações de proposta removidas para $nomeProfissional");
+  }
+
   static List<Notificacao> get todas {
     if (!_isInitialized) {
       debugPrint("NotificacaoService: Aviso - Serviço não inicializado, retornando lista vazia");

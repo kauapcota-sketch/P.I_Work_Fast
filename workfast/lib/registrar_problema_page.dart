@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:workfast/chamado_model.dart';
 
 class registraProblema extends StatelessWidget {
@@ -113,6 +114,31 @@ class _RegistrarProblemaPageState extends State<RegistrarProblemaPage> {
     Future.delayed(const Duration(milliseconds: 800), () {
       if (mounted) Navigator.pop(context, true);
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarDadosPerfil();
+  }
+
+  Future<void> _carregarDadosPerfil() async {
+    try {
+      final box = await Hive.openBox('perfil');
+      final nome = box.get('nome', defaultValue: '');
+      final telefone = box.get('telefone', defaultValue: '');
+      final email = box.get('email', defaultValue: '');
+      
+      if (mounted) {
+        setState(() {
+          if (nome.isNotEmpty) nomeController.text = nome;
+          if (telefone.isNotEmpty) telefoneController.text = telefone;
+          if (email.isNotEmpty) emailController.text = email;
+        });
+      }
+    } catch (e) {
+      // Silenciosamente ignora erros
+    }
   }
 
   @override

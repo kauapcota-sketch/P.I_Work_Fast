@@ -73,6 +73,17 @@ class AuthService {
     return null;
   }
 
+  // Salva o nome do usuário logado na box de perfil
+  static Future<void> salvarNomeNoPerfil(String username) async {
+    try {
+      final perfilBox = await Hive.openBox('perfil');
+      await perfilBox.put('nome', username);
+      await perfilBox.flush();
+    } catch (e) {
+      // Silenciosamente ignora erros
+    }
+  }
+
   // Verifica se um e-mail está cadastrado
   static bool emailExiste(String email) {
     final box = Hive.box(_boxName);

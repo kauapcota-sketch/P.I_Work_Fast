@@ -383,8 +383,10 @@ class _PerfilPageState extends State<PerfilPage> {
                                       style: TextStyle(
                                           fontSize: 14, color: textoPrimario))),
                               GestureDetector(
-                                onTap: () =>
-                                    setState(() => experiencias.remove(exp)),
+                                onTap: () {
+                                  setState(() => experiencias.remove(exp));
+                                  salvarDados();
+                                },
                                 child: Container(
                                   padding: const EdgeInsets.all(6),
                                   decoration: BoxDecoration(
